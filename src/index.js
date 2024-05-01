@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'; // React 18에서는 이렇게 im
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import App from './app.js';
 import TodoList from '@pages/todo.js';
+import MyCalendar from "./pages/calendar";
 
 const router = createBrowserRouter([
     {
@@ -15,6 +16,16 @@ const router = createBrowserRouter([
         },
       ],
     },
+    {
+        path: "/calender",
+        element: <App/>,
+        children: [
+            {
+                index: true,
+                element: <MyCalendar/>,
+            }
+        ]
+    }
   ]);
 
 // 루트 DOM 요소를 선택합니다.

@@ -49,6 +49,7 @@ module.exports = {
   ],
   devServer: {
     static: './dist',
-    hot: true // 핫 리로딩 활성화
+    hot: true, // 핫 리로딩 활성화
+    historyApiFallback: true
   }
 };
