@@ -81,6 +81,8 @@ export default function PrimarySearchAppBar() {
         return 'Home';
       case '/calendar':
         return 'Calendar';
+        case '/todo':
+          return 'Todo';
       default:
         return 'MUI'; // 기본값, 혹은 다른 경로를 추가할 수 있습니다.
     }
