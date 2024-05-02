@@ -17,12 +17,22 @@ const router = createBrowserRouter([
       ],
     },
     {
-        path: "/calendar",
+        path: "/calender",
         element: <App/>,
         children: [
             {
                 index: true,
                 element: <MyCalendar/>,
+            }
+        ]
+    },
+    {
+        path: "/todo",
+        element: <App/>,
+        children: [
+            {
+                index: true,
+                element: <TodoList/>,
             }
         ]
     }
