@@ -20,7 +20,7 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 
 
@@ -42,6 +42,9 @@ export default function PrimarySearchAppBar() {
   const [hambugerOpen, setHambugerOpen] = React.useState(false);
   const location = useLocation(); // 현재 위치 정보를 가져옵니다.
 
+  const navigate = useNavigate(); // 페이지 이동을 위한 훅
+
+
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
@@ -53,8 +56,10 @@ export default function PrimarySearchAppBar() {
     setMobileMoreAnchorEl(null);
   };
 
-  const handleMenuClose = () => {
+  const handleMenuClose = (path) => {
+    setHambugerOpen(false); // Drawer를 닫습니다
     setAnchorEl(null);
+    navigate(path);
     handleMobileMenuClose();
   };
 
@@ -74,8 +79,8 @@ export default function PrimarySearchAppBar() {
     switch(path) {
       case '/':
         return 'Home';
-      case '/calender':
-        return 'Calender';
+      case '/calendar':
+        return 'Calendar';
       default:
         return 'MUI'; // 기본값, 혹은 다른 경로를 추가할 수 있습니다.
     }
@@ -164,17 +169,28 @@ export default function PrimarySearchAppBar() {
       </DrawerHeader>
       <List>
         <ListItem disablePadding>
-          <ListItemButton onClick={() => handleMenuClose()}>
-            <ListItemText primary="Profile" />
+          <ListItemButton onClick={() => handleMenuClose('/')}>
+            <ListItemText primary="Home" />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <ListItemButton onClick={() => handleMenuClose()}>
-            <ListItemText primary="My account" />
+          <ListItemButton onClick={() => handleMenuClose('/calendar')}>
+            <ListItemText primary="Calendar" />
           </ListItemButton>
         </ListItem>
-        {/* 추가적인 메뉴 항목을 여기에 삽입할 수 있습니다 */}
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => handleMenuClose('/gantt')}>
+            <ListItemText primary="Gantt" />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => handleMenuClose('/todo')}>
+            <ListItemText primary="Todo" />
+          </ListItemButton>
+        </ListItem>
+      {/* 추가적인 메뉴 항목을 여기에 삽입할 수 있습니다 */}
       </List>
+
     </Drawer>
       <Outlet />
     </Box>

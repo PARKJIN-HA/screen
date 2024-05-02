@@ -17,7 +17,7 @@ const router = createBrowserRouter([
       ],
     },
     {
-        path: "/calender",
+        path: "/calendar",
         element: <App/>,
         children: [
             {
