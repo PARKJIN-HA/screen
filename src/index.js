@@ -4,6 +4,8 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import App from './app.js';
 import TodoList from '@pages/todo.js';
 import MyCalendar from "./pages/calendar";
+import Main from "@pages/main";
+import Gantt from "@pages/gantt";
 
 const router = createBrowserRouter([
     {
@@ -12,7 +14,7 @@ const router = createBrowserRouter([
       children: [
         {
           index: true,
-          element: <TodoList/>,
+          element: <Main/>,
         },
       ],
     },
@@ -33,6 +35,16 @@ const router = createBrowserRouter([
             {
                 index: true,
                 element: <TodoList/>,
+            }
+        ]
+    },
+    {
+        path: "/gantt",
+        element: <App/>,
+        children: [
+            {
+                index: true,
+                element: <Gantt/>,
             }
         ]
     }

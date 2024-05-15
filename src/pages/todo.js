@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
@@ -10,15 +10,32 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import {Grid, ListItemIcon} from "@mui/material";
 import {Calendar, momentLocalizer} from "react-big-calendar";
-import moment from "moment/moment";
-import IconButton from "@mui/material/IconButton";
-import ListItemButton from "@mui/material/ListItemButton";
-import CommentIcon from '@mui/icons-material/Comment';
+import moment from 'moment'
+import 'moment-timezone'
+import TodoComp from "@component/TodoComp";
+import {TimePicker} from '@mui/x-date-pickers/TimePicker';
+import {LocalizationProvider} from "@mui/x-date-pickers";
+import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs'
+import AddAlarmIcon from '@mui/icons-material/AddAlarm';
+import dayjs from "dayjs";
+import RepeatIcon from '@mui/icons-material/Repeat';
+import "../public/css/calendar.css"
 
 function TodoList() {
     const [todos, setTodos] = useState([]);
     const [currentInput, setCurrentInput] = useState('');
+    const [titleInput, setTitleInput] = useState('');
+    const [detailInput, setDetailInput] = useState('');
+    const [dateValue, setDateValue] = useState(moment())
+    const [pickedTime, setPickedTime] = useState(dayjs());
+    const clickRef = useRef(null)
 
+    const handleTitleInputChange = (event) => {
+        setTitleInput(event.target.value);
+    }
+    const handleDetailInputChange = (event) => {
+        setDetailInput(event.target.value);
+    }
     const handleInputChange = (event) => {
         setCurrentInput(event.target.value);
     };
@@ -30,33 +47,13 @@ function TodoList() {
         }
     };
 
-    const [checked, setChecked] = React.useState([0]);
-
-    const handleToggle = (value) => () => {
-        const currentIndex = checked.indexOf(value);
-        const newChecked = [...checked];
-
-        if (currentIndex === -1) {
-            newChecked.push(value);
-        } else {
-            newChecked.splice(currentIndex, 1);
-        }
-
-        setChecked(newChecked);
-    };
-
-    const handleKeyPress = (event) => {
-        if (event.key === 'Enter') {
-            handleAddTodo();
-        }
-    };
-
     const toggleTodo = (index) => {
         const newTodos = [...todos];
         newTodos[index].completed = !newTodos[index].completed;
         setTodos(newTodos);
     };
 
+    moment.tz.setDefault("Asia/Seoul");
     const localizer = momentLocalizer(moment);
 
     const myEvents = [
@@ -65,169 +62,105 @@ function TodoList() {
             allDay: true,
             start: new Date(2024, 3, 0), // 주의: 월은 0부터 시작합니다. 3은 4월을 의미합니다.
             end: new Date(2024, 3, 1),
-        },
-        {
-            title: 'Vacation',
-            start: new Date(2024, 3, 7),
-            end: new Date(2024, 3, 10),
-        },
-        {
-            title: 'Conference',
-            start: new Date(2024, 3, 20),
-            end: new Date(2024, 3, 23),
-        },
+        }
     ];
+
+    useEffect(() => {
+        return () => {
+            window.clearTimeout(clickRef?.current)
+        }
+    }, [])
+
+    const onSelectSlot = useCallback((slotInfo) => {
+        window.clearTimeout(clickRef?.current)
+        clickRef.current = window.setTimeout(() => {
+            // window.alert(slotInfo.start.toLocaleString())
+            setDateValue(moment(slotInfo.start))
+        }, 250)
+        // console.log(slotInfo.start.toLocaleString())
+    }, [])
+
+    const mp = {"Feb 2": [0, 1, 2, 3], "Feb 3": [1, 2, 3, 4], "Feb 4": [8, 9, 10, 11]};
 
     return (
         <Box sx={{width: '100%', height: "90vh", bgcolor: 'background.paper'}}>
             <div style={{display: "flex", height: "100%"}}>
                 <Grid container spacing={0}>
-                    <Grid item xs={3}>
-                        <Box sx={{
-                            height: "10%",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "3em",
-                            border: "black solid 1px"
-                        }}>
-                            Feb 21
-                        </Box>
-                        <List sx={{width: '100%', bgcolor: 'background.paper'}}>
-                            {[1, 2, 3, 4].map((value) => {
-                                const labelId = `checkbox-list-label-${value}`;
-                                return (
-                                    <div>
-                                        <ListItem
-                                            key={value}
-                                            disablePadding
-                                        >
-                                            <ListItemButton role={undefined} onClick={handleToggle(value)} dense>
-                                                <ListItemIcon>
-                                                    <Checkbox
-                                                        edge="start"
-                                                        checked={checked.indexOf(value) !== -1}
-                                                        tabIndex={-1}
-                                                        disableRipple
-                                                        inputProps={{'aria-labelledby': labelId}}
-                                                    />
-                                                </ListItemIcon>
-                                                <ListItemText id={labelId} primary={`Line item ${value + 1}`}/>
-                                            </ListItemButton>
-                                        </ListItem>
-                                        <Divider variant="middle" sx={{width: "90%"}}/>
-                                    </div>
-                                );
-                            })}
-                        </List>
-                    </Grid>
-                    <Grid item xs={3}>
-                        <Box sx={{
-                            height: "10%",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "3em",
-                            border: "black solid 1px"
-                        }}>
-                            Feb 22
-                        </Box>
-                        <List sx={{width: '100%', bgcolor: 'background.paper'}}>
-                            {[5, 6, 7, 8].map((value) => {
-                                const labelId = `checkbox-list-label-${value}`;
-                                return (
-                                    <div>
-                                        <ListItem
-                                            key={value}
-                                            disablePadding
-                                        >
-                                            <ListItemButton role={undefined} onClick={handleToggle(value)} dense>
-                                                <ListItemIcon>
-                                                    <Checkbox
-                                                        edge="start"
-                                                        checked={checked.indexOf(value) !== -1}
-                                                        tabIndex={-1}
-                                                        disableRipple
-                                                        inputProps={{'aria-labelledby': labelId}}
-                                                    />
-                                                </ListItemIcon>
-                                                <ListItemText id={labelId} primary={`Line item ${value + 1}`}/>
-                                            </ListItemButton>
-                                        </ListItem>
-                                        <Divider variant="middle" sx={{width: "90%"}}/>
-                                    </div>
-                                );
-                            })}
-                        </List>
-                    </Grid>
-                    <Grid item xs={3}>
-                        <Box sx={{
-                            height: "10%",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "3em",
-                            border: "black solid 1px"
-                        }}>
-                            Feb 23
-                        </Box>
-                        <List sx={{width: '100%', bgcolor: 'background.paper'}}>
-                            {[9, 10, 11, 12].map((value) => {
-                                const labelId = `checkbox-list-label-${value}`;
-                                return (
-                                    <div>
-                                        <ListItem
-                                            key={value}
-                                            disablePadding
-                                        >
-                                            <ListItemButton role={undefined} onClick={handleToggle(value)} dense>
-                                                <ListItemIcon>
-                                                    <Checkbox
-                                                        edge="start"
-                                                        checked={checked.indexOf(value) !== -1}
-                                                        tabIndex={-1}
-                                                        disableRipple
-                                                        inputProps={{'aria-labelledby': labelId}}
-                                                    />
-                                                </ListItemIcon>
-                                                <ListItemText id={labelId} primary={`Line item ${value + 1}`}/>
-                                            </ListItemButton>
-                                        </ListItem>
-                                        <Divider variant="middle" sx={{width: "90%"}}/>
-                                    </div>
-                                );
-                            })}
-                        </List>
-                    </Grid>
+                    {
+                        Object.entries(mp).map(([date, todoList]) => {
+                            return <TodoComp key={date} date={date} todoList={todoList}/>
+                        })
+                    }
                     <Grid item xs={3}>
                         <Box display="flex" alignItems="center" height={"100%"}
-                             sx={{flexFlow: "column", justifyContent: "space-evenly"}}>
-                            <Box sx={{height: "5%", display: "flex", alignItems: "center"}}>
-                                Add Todo Title
+                             sx={{flexFlow: "column"}}
+                             my={1}
+                             gap={2}
+                        >
+                            <Box sx={{width: "80%", height: "5%", display: "flex", alignItems: "center"}}>
+                                <TextField
+                                    label="Add Todo Title"
+                                    variant="standard"
+                                    fullWidth
+                                    value={titleInput}
+                                    onChange={handleTitleInputChange}
+                                />
                             </Box>
-                            <Divider sx={{width: "80%", marginY: "3%"}}/>
-                            <Box sx={{width: '100%', height: "30%"}}>
+                            <Divider sx={{width: "80%"}}/>
+                            <Box sx={{width: "80%", height: "5%", display: "flex", alignItems: "center"}}>
+                                <TextField
+                                    label="Details"
+                                    variant="standard"
+                                    fullWidth
+                                    value={detailInput}
+                                    onChange={handleDetailInputChange}
+                                />
+                            </Box>
+                            <Box sx={{width: '100%', height: "40%"}}>
                                 <Calendar
                                     localizer={localizer}
                                     events={myEvents}
-                                    startAccessor="start"
-                                    endAccessor="end"
-                                    toolbar={false}
+                                    views={['month']}
+                                    toolbar={true}
+                                    onSelectSlot={onSelectSlot}
+                                    selectable
+                                    date={dateValue}
+                                    dayPropGetter={date => (moment(date).format('DD') === moment(dateValue).format('DD')) && ({className: 'rbc-selected-day'})}
                                 />
+                            </Box>
+                            <Box sx={{
+                                width: '100%',
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-evenly"
+                            }}>
+                                <AddAlarmIcon sx={{fontSize: "3em"}}/>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <TimePicker
+                                        sx={{width: "60%"}}
+                                        variant="standard"
+                                        value={pickedTime}
+                                        onChange={(newValue) => setPickedTime(newValue)}
+                                    />
+                                </LocalizationProvider>
+                            </Box>
+                            <Box sx={{
+                                width: '100%',
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-evenly"
+                            }}>
+                                <RepeatIcon sx={{fontSize: "3em"}}/>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <TimePicker sx={{width: "60%"}} views={['minutes']} format="분 당 한 번씩"/>
+                                </LocalizationProvider>
                             </Box>
                             <Box>
-                                <TextField
-                                    label="Add Todo"
-                                    variant="outlined"
-                                    fullWidth
-                                    value={currentInput}
-                                    onChange={handleInputChange}
-                                    onKeyPress={handleKeyPress}
-                                />
-                                <Button variant="contained" onClick={handleAddTodo} sx={{ml: 1}}>
-                                    Add
-                                </Button>
+
                             </Box>
+                            <Button variant="contained" onClick={handleAddTodo} sx={{px: 5}} fullWidth>
+                                Add
+                            </Button>
                         </Box>
                     </Grid>
                 </Grid>
