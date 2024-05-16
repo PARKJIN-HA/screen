@@ -21,6 +21,9 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import ProfileDialog from "@component/ProfileDialog";
+import {useEffect} from "react";
+import NotiModal from "@component/NotiModal";
 
 
 
@@ -41,16 +44,23 @@ export default function PrimarySearchAppBar() {
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const [hambugerOpen, setHambugerOpen] = React.useState(false);
   const location = useLocation(); // 현재 위치 정보를 가져옵니다.
+  const [openProfile, setOpenProfile] = React.useState(false);
+  const [openModal, setOpenModal] = React.useState(false);
 
   const navigate = useNavigate(); // 페이지 이동을 위한 훅
-
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
   const handleProfileMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
+    event?.preventDefault();
+    setOpenProfile(true);
   };
+
+  const handleProfileMenuClose = (event) => {
+    event?.preventDefault();
+    setOpenProfile(false);
+  }
 
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
@@ -120,6 +130,7 @@ export default function PrimarySearchAppBar() {
               size="large"
               aria-label="show 17 new notifications"
               color="inherit"
+              onClick={() => setOpenModal(true)}
             >
               <Badge badgeContent={17} color="error">
                 <NotificationsIcon />
@@ -136,6 +147,8 @@ export default function PrimarySearchAppBar() {
             >
               <AccountCircle />
             </IconButton>
+            <ProfileDialog openProfile={openProfile} setOpenProfile={setOpenProfile} />
+            <NotiModal open={openModal} setOpen={setOpenModal}/>
           </Box>
           <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
             <IconButton

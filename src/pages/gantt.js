@@ -1,9 +1,10 @@
 import React from 'react';
+import GanttComp from '../component/GanttComp';
 
 export default function Gantt() {
     return (
         <div>
-            <h1>Gantt</h1>
+            <GanttComp>Gantt</GanttComp>
         </div>
     )
 }

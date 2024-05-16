@@ -4,6 +4,7 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import {Grid} from "@mui/material";
 import Button from "@mui/material/Button";
+import FormDialog from "@component/CalDialogComp";
 
 // 로컬라이저 설정
 const localizer = momentLocalizer(moment);
@@ -34,9 +35,7 @@ function MyCalendar() {
             <Grid container spacing={0}>
                 <Grid item xs={2}>
                     <div style={{width: "100%", height: "10%", display: "flex", justifyContent: "center", alignItems: "center"}}>
-                        <Button variant="contained"  style={{width: "80%", height: "80%"}}>
-                            Create
-                        </Button>
+                        <FormDialog />
                     </div>
                     <Calendar
                         localizer={localizer}
