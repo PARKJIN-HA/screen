@@ -6,11 +6,11 @@ import DialogContent from '@mui/material/DialogContent';
 import {Avatar, Grid} from "@mui/material";
 import Box from "@mui/material/Box";
 
-export default function ProfileDialog({openProfile, setOpenProfile}) {
+export default function ProfileDialog({open, setOpen}) {
 
     const handleClose = () => {
         console.log("handleClose function called");
-        setOpenProfile(false);
+        setOpen(false);
     };
 
     return (
@@ -18,7 +18,7 @@ export default function ProfileDialog({openProfile, setOpenProfile}) {
             <Dialog
                 fullWidth={true}
                 maxWidth={"xs"}
-                open={openProfile}
+                open={open}
                 onClose={handleClose}
             >
                 <DialogContent>

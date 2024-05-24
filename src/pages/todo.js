@@ -26,9 +26,9 @@ function TodoList() {
     const [currentInput, setCurrentInput] = useState('');
     const [titleInput, setTitleInput] = useState('');
     const [detailInput, setDetailInput] = useState('');
-    const [dateValue, setDateValue] = useState(moment())
+    const [dateValue, setDateValue] = useState(moment);
     const [pickedTime, setPickedTime] = useState(dayjs());
-    const clickRef = useRef(null)
+    const clickRef = useRef(null);
 
     const handleTitleInputChange = (event) => {
         setTitleInput(event.target.value);
@@ -74,13 +74,22 @@ function TodoList() {
     const onSelectSlot = useCallback((slotInfo) => {
         window.clearTimeout(clickRef?.current)
         clickRef.current = window.setTimeout(() => {
-            // window.alert(slotInfo.start.toLocaleString())
             setDateValue(moment(slotInfo.start))
-        }, 250)
-        // console.log(slotInfo.start.toLocaleString())
+        }, 100)
     }, [])
 
-    const mp = {"Feb 2": [0, 1, 2, 3], "Feb 3": [1, 2, 3, 4], "Feb 4": [8, 9, 10, 11]};
+    const onNavigate = useCallback((newDate) => setDateValue(newDate), [setDateValue])
+    const [mp, setMp] = useState({});
+
+    useEffect(() => {
+        setMp({
+            [dateValue.format("MM.DD")]: [0, 1, 2, 3],
+            [dateValue.clone().add(1, 'days').format("MM.DD")]: [1, 2, 3, 4],
+            [[dateValue.clone().add(2, 'days').format("MM.DD")]]: [8, 9, 10, 11],
+            [[dateValue.clone().add(3, 'days').format("MM.DD")]]: [8, 9, 10, 11],
+            [[dateValue.clone().add(4, 'days').format("MM.DD")]]: [8, 9, 10, 11]
+        });
+    }, [dateValue]); // This effect runs whenever dateValue changes
 
     return (
         <Box sx={{width: '100%', height: "90vh", bgcolor: 'background.paper'}}>
@@ -88,10 +97,10 @@ function TodoList() {
                 <Grid container spacing={0}>
                     {
                         Object.entries(mp).map(([date, todoList]) => {
-                            return <TodoComp key={date} date={date} todoList={todoList}/>
+                            return <TodoComp key={date} date={date} todoList={todoList} size={2}/>
                         })
                     }
-                    <Grid item xs={3}>
+                    <Grid item xs={2}>
                         <Box display="flex" alignItems="center" height={"100%"}
                              sx={{flexFlow: "column"}}
                              my={1}
@@ -122,6 +131,7 @@ function TodoList() {
                                     events={myEvents}
                                     views={['month']}
                                     toolbar={true}
+                                    onNavigate={onNavigate}
                                     onSelectSlot={onSelectSlot}
                                     selectable
                                     date={dateValue}

@@ -24,8 +24,8 @@
     "react": "^18.2.0",
     "react-big-calendar": "^1.11.6",
     "react-dom": "^18.2.0",
-    "react-router-dom": "6.4",
-    "svelte-gantt": "^4.3.2"
+    "react-google-charts": "^4.0.1",
+    "react-router-dom": "6.4"
   },
   "devDependencies": {
     "@babel/core": "^7.24.4",
