@@ -8,7 +8,7 @@ import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
 import React from "react";
 
-export default function TodoComp({date, todoList, size=3}) {
+export default function TodoComp({date, todoList, size = 3, boxExisted = true}) {
     const [checked, setChecked] = React.useState([0]);
 
     const handleToggle = (value) => () => {
@@ -25,18 +25,23 @@ export default function TodoComp({date, todoList, size=3}) {
     };
 
     return (
-        <Grid item xs={size}>
-            <Box sx={{
-                height: "10%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "3em",
-                border: "black solid 1px"
-            }}>
-                {date}
-            </Box>
-            <List sx={{width: '100%', bgcolor: 'background.paper'}}>
+        <Grid item
+              xs={size}
+              sx={{
+                  border: "black solid 1px"
+              }}>
+            {boxExisted &&
+                <Box sx={{
+                    height: "10%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "3em"
+                }}>
+                    {date}
+                </Box>
+            }
+            <List sx={{width: '100%', backgroundColor: 'var(--white)'}}>
                 {todoList.map((value) => {
                     const labelId = `checkbox-list-label-${value}`;
                     return (

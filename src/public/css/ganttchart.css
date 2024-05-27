@@ -1,0 +1,47 @@
+.gantt-chart {
+    height: 300px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.gantt-chart-header {
+    display: flex;
+    position: sticky;
+    top: 0;
+    background: #f0f0f0;
+    border-bottom: 1px solid #ccc;
+}
+
+.gantt-chart-day {
+    flex: 1;
+    padding: 5px;
+    text-align: center;
+    border-right: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+.gantt-chart-body {
+    position: relative;
+    flex-grow: 1;
+    height: calc(90% - 31px);
+}
+
+.gantt-task {
+    position: absolute;
+    top: 10px;
+    height: 20px;
+    text-align: left;
+    color: black;
+    line-height: 20px;
+    overflow: hidden;
+    border: 1px solid #ccc;
+}
+
+.gantt-task-inner {
+    height: 100%;
+    text-align: center;
+    color: white;
+    line-height: 20px;
+}

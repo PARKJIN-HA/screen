@@ -1,0 +1,9 @@
+.rbc-toolbar {
+    height: 20% !important;
+}
+.rbc-btn-group {
+    margin: 0 !important;
+}
+.rbc-toolbar .rbc-toolbar-label {
+    width: 100% !important;
+}

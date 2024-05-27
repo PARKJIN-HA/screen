@@ -7,10 +7,7 @@ import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Badge from '@mui/material/Badge';
-import MenuItem from '@mui/material/MenuItem';
-import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
-import AccountCircle from '@mui/icons-material/AccountCircle';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import MoreIcon from '@mui/icons-material/MoreVert';
 import Drawer from '@mui/material/Drawer';
@@ -23,8 +20,8 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import {Link, useNavigate, useLocation} from 'react-router-dom';
 import ProfileDialog from "@component/ProfileDialog";
-import {useEffect} from "react";
-import NotiModal from "@component/NotiModal";
+import './public/css/App.css';
+import {Avatar, Popover} from "@mui/material";
 
 
 const drawerWidth = 240;
@@ -38,37 +35,28 @@ const DrawerHeader = styled('div')(({theme}) => ({
     justifyContent: 'flex-end',
 }));
 
-export default function PrimarySearchAppBar() {
+export default function App() {
     const theme = useTheme();
     const [anchorEl, setAnchorEl] = useState(null);
+    const [anchorNotiEl, setAnchorNotiEl] = useState(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
     const [hamburgerOpen, setHamburgerOpen] = useState(false);
-    const location = useLocation(); // 현재 위치 정보를 가져옵니다.
-    const [openProfile, setOpenProfile] = useState(false);
-    const [openNotiModal, setOpenNotiModal] = useState(false);
+    const location = useLocation();
 
     const navigate = useNavigate(); // 페이지 이동을 위한 훅
 
     const isMenuOpen = Boolean(anchorEl);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
-    const handleProfileMenuOpen = (event) => {
-        // event?.preventDefault();
-        setOpenProfile(true);
+    const handleNotiClick = (event) => {
+        setAnchorNotiEl(event.currentTarget);
     };
 
-    const handleProfileMenuClose = (event) => {
-        // event?.preventDefault();
-        setOpenProfile(false);
-    }
+    const handleNotiClose = () => {
+        setAnchorNotiEl(null);
+    };
 
-    const handleNotiModalOpen = (event) => {
-        setOpenNotiModal(true);
-    }
-
-    const handleNotiModalClose = (event) => {
-        setOpenNotiModal(false);
-    }
+    const openNoti = Boolean(anchorNotiEl);
 
     const handleMobileMenuClose = () => {
         setMobileMoreAnchorEl(null);
@@ -140,25 +128,30 @@ export default function PrimarySearchAppBar() {
                             size="large"
                             aria-label="show 17 new notifications"
                             color="inherit"
-                            onClick={handleNotiModalOpen}
+                            onClick={handleNotiClick}
+                            aria-describedby={"noti-popover"}
                         >
                             <Badge badgeContent={17} color="error">
                                 <NotificationsIcon/>
                             </Badge>
                         </IconButton>
-                        <IconButton
-                            size="large"
-                            edge="end"
-                            aria-label="account of current user"
-                            aria-controls={menuId}
-                            aria-haspopup="true"
-                            onClick={handleProfileMenuOpen}
-                            color="inherit"
+                        <Popover
+                            id={"noti-popover"}
+                            open={openNoti}
+                            anchorEl={anchorNotiEl}
+                            onClose={handleNotiClose}
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'right',
+                            }}
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
                         >
-                            <AccountCircle/>
-                        </IconButton>
-                        <ProfileDialog open={openProfile} setOpen={setOpenProfile}/>
-                        <NotiModal open={openNotiModal} setOpen={setOpenNotiModal}/>
+                            The content of the Popover.
+                        </Popover>
+                        <ProfileDialog/>
                     </Box>
                     <Box sx={{display: {xs: 'flex', md: 'none'}}}>
                         <IconButton
@@ -187,35 +180,43 @@ export default function PrimarySearchAppBar() {
                 anchor="left"
                 open={hamburgerOpen}
             >
-                <DrawerHeader>
-                    <IconButton onClick={handleHamburgerClose}>
-                        {theme.direction === 'ltr' ? <ChevronLeftIcon/> : <ChevronRightIcon/>}
-                    </IconButton>
-                </DrawerHeader>
-                <List>
-                    <ListItem disablePadding>
-                        <ListItemButton onClick={() => handleMenuClose('/')}>
-                            <ListItemText primary="Home"/>
-                        </ListItemButton>
-                    </ListItem>
-                    <ListItem disablePadding>
-                        <ListItemButton onClick={() => handleMenuClose('/calendar')}>
-                            <ListItemText primary="Calendar"/>
-                        </ListItemButton>
-                    </ListItem>
-                    <ListItem disablePadding>
-                        <ListItemButton onClick={() => handleMenuClose('/gantt')}>
-                            <ListItemText primary="Gantt"/>
-                        </ListItemButton>
-                    </ListItem>
-                    <ListItem disablePadding>
-                        <ListItemButton onClick={() => handleMenuClose('/todo')}>
-                            <ListItemText primary="Todo"/>
-                        </ListItemButton>
-                    </ListItem>
-                    {/* 추가적인 메뉴 항목을 여기에 삽입할 수 있습니다 */}
-                </List>
-
+                <Box style={{display: 'flex', flexDirection: 'column', justifyContent: "space-between", height: "100%"}}>
+                    <Box>
+                        <DrawerHeader>
+                            <IconButton onClick={handleHamburgerClose}>
+                                {theme.direction === 'ltr' ? <ChevronLeftIcon/> : <ChevronRightIcon/>}
+                            </IconButton>
+                        </DrawerHeader>
+                        <List>
+                            <ListItem disablePadding>
+                                <ListItemButton onClick={() => handleMenuClose('/')}>
+                                    <ListItemText primary="Home"/>
+                                </ListItemButton>
+                            </ListItem>
+                            <ListItem disablePadding>
+                                <ListItemButton onClick={() => handleMenuClose('/calendar')}>
+                                    <ListItemText primary="Calendar"/>
+                                </ListItemButton>
+                            </ListItem>
+                            <ListItem disablePadding>
+                                <ListItemButton onClick={() => handleMenuClose('/gantt')}>
+                                    <ListItemText primary="Gantt"/>
+                                </ListItemButton>
+                            </ListItem>
+                            <ListItem disablePadding>
+                                <ListItemButton onClick={() => handleMenuClose('/todo')}>
+                                    <ListItemText primary="Todo"/>
+                                </ListItemButton>
+                            </ListItem>
+                            {/* 추가적인 메뉴 항목을 여기에 삽입할 수 있습니다 */}
+                        </List>
+                    </Box>
+                    <Box>
+                        <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                            <Avatar/>
+                        </Box>
+                    </Box>
+                </Box>
             </Drawer>
             <Outlet/>
         </Box>

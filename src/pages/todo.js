@@ -19,7 +19,21 @@ import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs'
 import AddAlarmIcon from '@mui/icons-material/AddAlarm';
 import dayjs from "dayjs";
 import RepeatIcon from '@mui/icons-material/Repeat';
+import styles from "../public/css/todo.module.css";
 import "../public/css/calendar.css"
+import styled from 'styled-components';
+
+const HomePageContainer = styled.div`
+    .rbc-toolbar {
+        height: 20% !important;
+    }
+    .rbc-btn-group {
+        margin: 0 !important;
+    }
+    .rbc-toolbar .rbc-toolbar-label {
+        width: 100% !important;
+    }
+`;
 
 function TodoList() {
     const [todos, setTodos] = useState([]);
@@ -78,7 +92,7 @@ function TodoList() {
         }, 100)
     }, [])
 
-    const onNavigate = useCallback((newDate) => setDateValue(newDate), [setDateValue])
+    const onNavigate = useCallback((newDate) => setDateValue(moment(newDate)), [setDateValue])
     const [mp, setMp] = useState({});
 
     useEffect(() => {
@@ -92,7 +106,7 @@ function TodoList() {
     }, [dateValue]); // This effect runs whenever dateValue changes
 
     return (
-        <Box sx={{width: '100%', height: "90vh", bgcolor: 'background.paper'}}>
+        <Box sx={{width: '100%', height: "calc(100vh - 64px)", padding: 0}}>
             <div style={{display: "flex", height: "100%"}}>
                 <Grid container spacing={0}>
                     {
@@ -103,7 +117,7 @@ function TodoList() {
                     <Grid item xs={2}>
                         <Box display="flex" alignItems="center" height={"100%"}
                              sx={{flexFlow: "column"}}
-                             my={1}
+                             justifyContent={"space-around"}
                              gap={2}
                         >
                             <Box sx={{width: "80%", height: "5%", display: "flex", alignItems: "center"}}>
@@ -115,8 +129,13 @@ function TodoList() {
                                     onChange={handleTitleInputChange}
                                 />
                             </Box>
-                            <Divider sx={{width: "80%"}}/>
-                            <Box sx={{width: "80%", height: "5%", display: "flex", alignItems: "center"}}>
+                            <Box sx={{
+                                width: "80%",
+                                height: "5%",
+                                display: "flex",
+                                alignItems: "center",
+                                marginTop: "-15%"
+                            }}>
                                 <TextField
                                     label="Details"
                                     variant="standard"
@@ -125,7 +144,7 @@ function TodoList() {
                                     onChange={handleDetailInputChange}
                                 />
                             </Box>
-                            <Box sx={{width: '100%', height: "40%"}}>
+                            <HomePageContainer style={{width: '100%', height: "40%"}}>
                                 <Calendar
                                     localizer={localizer}
                                     events={myEvents}
@@ -137,36 +156,37 @@ function TodoList() {
                                     date={dateValue}
                                     dayPropGetter={date => (moment(date).format('DD') === moment(dateValue).format('DD')) && ({className: 'rbc-selected-day'})}
                                 />
-                            </Box>
-                            <Box sx={{
-                                width: '100%',
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-evenly"
-                            }}>
-                                <AddAlarmIcon sx={{fontSize: "3em"}}/>
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <TimePicker
-                                        sx={{width: "60%"}}
-                                        variant="standard"
-                                        value={pickedTime}
-                                        onChange={(newValue) => setPickedTime(newValue)}
-                                    />
-                                </LocalizationProvider>
-                            </Box>
-                            <Box sx={{
-                                width: '100%',
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-evenly"
-                            }}>
-                                <RepeatIcon sx={{fontSize: "3em"}}/>
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <TimePicker sx={{width: "60%"}} views={['minutes']} format="분 당 한 번씩"/>
-                                </LocalizationProvider>
-                            </Box>
+                            </HomePageContainer>
                             <Box>
-
+                                <Box sx={{
+                                    width: '100%',
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-evenly",
+                                    marginBottom: "5%"
+                                }}>
+                                    <AddAlarmIcon sx={{fontSize: "2em"}}/>
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <TimePicker
+                                            sx={{width: "70%"}}
+                                            variant="standard"
+                                            value={pickedTime}
+                                            onChange={(newValue) => setPickedTime(newValue)}
+                                        />
+                                    </LocalizationProvider>
+                                </Box>
+                                <Box sx={{
+                                    width: '100%',
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-evenly"
+                                }}>
+                                    <RepeatIcon sx={{fontSize: "2em"}}/>
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <TimePicker sx={{width: "70%"}} views={['minutes']} format="m
+                                        분 당 한 번씩"/>
+                                    </LocalizationProvider>
+                                </Box>
                             </Box>
                             <Button variant="contained" onClick={handleAddTodo} sx={{px: 5}} fullWidth>
                                 Add
@@ -175,26 +195,6 @@ function TodoList() {
                     </Grid>
                 </Grid>
             </div>
-            <List component="nav" aria-label="todo list">
-                {todos.map((todo, index) => (
-                    <ListItem
-                        key={index}
-                        disablePadding
-                    >
-                        <FormControlLabel
-                            control={<Checkbox checked={todo.completed}/>}
-                            label={<ListItemText primary={todo.text}/>}
-                            onClick={() => toggleTodo(index)}
-                            sx={{
-                                width: '100%',
-                                '& .MuiTypography-root': {
-                                    textDecoration: todo.completed ? 'line-through' : 'none',
-                                },
-                            }}
-                        />
-                    </ListItem>
-                ))}
-            </List>
         </Box>
     );
 }

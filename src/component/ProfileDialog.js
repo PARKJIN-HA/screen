@@ -3,48 +3,74 @@ import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import {Avatar, Grid} from "@mui/material";
+import {Avatar, Grid, ListItemIcon, Tooltip} from "@mui/material";
 import Box from "@mui/material/Box";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Divider from "@mui/material/Divider";
+import {Logout, PersonAdd, Settings} from "@mui/icons-material";
+import IconButton from "@mui/material/IconButton";
 
-export default function ProfileDialog({open, setOpen}) {
+export default function ProfileDialog({}) {
+
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const open = Boolean(anchorEl);
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
 
     const handleClose = () => {
-        console.log("handleClose function called");
-        setOpen(false);
+        setAnchorEl(null);
     };
 
     return (
-        <React.Fragment>
-            <Dialog
-                fullWidth={true}
-                maxWidth={"xs"}
+        <>
+            <Box style={{display: "contents"}}>
+                <Tooltip title="Account settings">
+                    <IconButton
+                        onClick={handleClick}
+                        size="small"
+                        sx={{ml: 2}}
+                        aria-controls={open ? 'account-menu' : undefined}
+                        aria-haspopup="true"
+                        aria-expanded={open ? 'true' : undefined}
+                    >
+                        <Avatar sx={{width: 32, height: 32}}></Avatar>
+                    </IconButton>
+                </Tooltip>
+            </Box>
+            <Menu
+                anchorEl={anchorEl}
+                id="account-menu"
                 open={open}
                 onClose={handleClose}
+                onClick={handleClose}
+                transformOrigin={{horizontal: 'right', vertical: 'top'}}
+                anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}
             >
-                <DialogContent>
-                    <Box>
-                        <Grid container
-                              direction="column"
-                              justifyContent="center"
-                              alignItems="center"
-                              spacing={2}
-                        >
-                            <Grid item>
-                                <Avatar>H</Avatar>
-                            </Grid>
-                            <Grid item style={{width: "100%"}}>
-                                <Button variant="contained" fullWidth>Group Change</Button>
-                            </Grid>
-                            <Grid item style={{width: "100%"}}>
-                                <Button variant="contained" fullWidth>Profile</Button>
-                            </Grid>
-                            <Grid item style={{width: "100%"}}>
-                                <Button variant="contained" fullWidth>로그아웃</Button>
-                            </Grid>
-                        </Grid>
-                    </Box>
-                </DialogContent>
-            </Dialog>
-        </React.Fragment>
+                <MenuItem onClick={handleClose} style={{justifyContent: "space-evenly"}}>
+                    <Avatar/> <Divider orientation={"vertical"} variant={"middle"} flexItem /> Profile
+                </MenuItem>
+                <Divider/>
+                <MenuItem onClick={handleClose}>
+                    <ListItemIcon>
+                        <PersonAdd fontSize="small"/>
+                    </ListItemIcon>
+                    Add another account
+                </MenuItem>
+                <MenuItem onClick={handleClose}>
+                    <ListItemIcon>
+                        <Settings fontSize="small"/>
+                    </ListItemIcon>
+                    Settings
+                </MenuItem>
+                <MenuItem onClick={handleClose}>
+                    <ListItemIcon>
+                        <Logout fontSize="small"/>
+                    </ListItemIcon>
+                    Logout
+                </MenuItem>
+            </Menu>
+        </>
     );
 }

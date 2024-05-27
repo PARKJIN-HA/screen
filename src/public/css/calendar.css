@@ -9,7 +9,75 @@
 /*    margin-top: -5px; !* I had an 8px offset *!*/
 /*}*/
 
+
+.rbc-toolbar {
+    background-color: var(--primary-color);
+    color: var(--white);
+    margin-bottom: 0 !important;
+    height: 50px;
+}
+
+.rbc-toolbar button {
+    background-color: var(--primary-color) !important;
+    color: var(--white) !important;
+}
+.rbc-toolbar-label {
+    font-size: 1.5rem;
+}
+
+.rbc-btn-group {
+    margin-left: 20px;
+}
+
+.rbc-month-header {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    background-color: var(--secondary-color);
+    color: var(--white);
+}
+.rbc-header {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.rbc-header:first-child {
+    color: red;
+}
+
+.rbc-day-bg.rbc-today {
+    background-color: var(--primary-color) !important;
+    color: var(--white);
+}
+
+.rbc-day-bg {
+    background-color: var(--tertiary-color) !important;
+}
+.rbc-date-cell.rbc-now {
+    background-color: var(--primary-color);
+    color: var(--white);
+    padding-right: 4px;
+}
+
+.rbc-today.rbc-current {
+    background-color: #5f8fff;
+    color: white;
+}
+
+.rbc-date-cell.rbc-now.rbc-current {
+    background-color: #5f8fff;
+    color: white;
+    padding-right: 4px;
+}
+
 .rbc-current {
     background-color: #5f8fff;
     color: white;
+}
+
+.rbc-small-cal .rbc-event {
+    height: 0;
 }

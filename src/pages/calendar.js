@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {Calendar, momentLocalizer} from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -7,8 +7,9 @@ import Button from "@mui/material/Button";
 import FormDialog from "@component/CalDialogComp";
 import Box from "@mui/material/Box";
 import {ExpandMore} from "@mui/icons-material";
-import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import dayjs from "dayjs";
 
 // 로컬라이저 설정
 const localizer = momentLocalizer(moment);
@@ -34,10 +35,24 @@ const myEvents = [
 ];
 
 function MyCalendar() {
-    const items = ['Item 1', 'Item 2', 'Item 3', /* ... */];
+    const [items, setItems] = useState([]);
+    const [checked, setChecked] = useState([]);
+    const [dateValue, setDateValue] = useState(moment);
+    const clickRef = useRef(null);
 
-    // Initialize the checked state with an array of the same length, all set to false
-    const [checked, setChecked] = React.useState(new Array(items.length).fill(false));
+    // Fetch items from API
+    useEffect(() => {
+        fetch('http://localhost:9000/api/items')  // Replace with your API endpoint
+            .then(response => {
+                setItems(response.data);
+                setChecked(new Array(response.data.length).fill(false));
+            })
+            .catch(error => {
+                setItems(["Items 1", "Items 2", "Items 3"]);
+                setChecked(new Array(items.length).fill(false));
+                console.error('Error fetching items:', error);
+            });
+    }, [setItems, setChecked]);
 
     const handleChange = (event, index) => {
         const newChecked = [...checked];
@@ -45,59 +60,88 @@ function MyCalendar() {
         setChecked(newChecked);
     };
 
-    const children = (
-        <Box sx={{ display: 'flex', flexDirection: 'column', ml: 3 }}>
-            <FormControlLabel
-                label={items[1]}
-                control={<Checkbox checked={checked[1]} onChange={handleChange} />}
-            />
-            <FormControlLabel
-                label={items[2]}
-                control={<Checkbox checked={checked[2]} onChange={handleChange} />}
-            />
-        </Box>
-    );
+    const handleParentChange = (event) => {
+        const newChecked = checked.map(() => event.target.checked);
+        setChecked(newChecked);
+    };
+
+    const determineIndeterminate = () => {
+        return checked.some((item) => item) && !checked.every((item) => item);
+    };
+
+    const onSelectSlot = useCallback((slotInfo) => {
+        window.clearTimeout(clickRef?.current)
+        clickRef.current = window.setTimeout(() => {
+            setDateValue(moment(slotInfo.start))
+        }, 100)
+    }, [])
+
+    const onNavigate = useCallback((newDate) => setDateValue(moment(newDate)), [setDateValue])
 
     return (
-        <div style={{display: "flex", height: '90vh'}}>
+        <div style={{display: "flex",  height: "calc(100vh - 64px)"}}>
             <Grid container spacing={1}>
                 <Grid item xs={2}>
-                    <div style={{width: "100%", height: "10%", display: "flex", justifyContent: "center", alignItems: "center"}}>
-                        <FormDialog />
+                    <div style={{
+                        width: "100%",
+                        height: "10%",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center"
+                    }}>
+                        <FormDialog/>
                     </div>
                     <Calendar
                         localizer={localizer}
                         events={myEvents}
                         startAccessor="start"
                         endAccessor="end"
-                        toolbar={true}
+                        toolbar={false}
                         views={['month']}
+                        onNavigate={onNavigate}
+                        onSelectSlot={onSelectSlot}
+                        selectable
+                        date={dateValue}
+                        dayPropGetter={date => (moment(date).format('DD') === moment(dateValue).format('DD')) && ({className: 'rbc-selected-day'})}
                         style={{width: '100%', height: "30%"}}
                     />
                     <Box style={{height: "60%"}}>
                         <Accordion>
                             <AccordionSummary
-                                expandIcon={<ExpandMore />}
+                                expandIcon={<ExpandMore/>}
                                 aria-controls="panel1-content"
                                 id="panel1-header"
                             >
                                 Accordion 1
                             </AccordionSummary>
                             <AccordionDetails>
-                                <Grid container spacing={2}>
-                                    <Grid item xs={12}>
+                                <Grid container display={"flex"} flexDirection={"column"}>
+                                    {items.length > 0 && (
                                         <FormControlLabel
                                             label={items[0]}
                                             control={
                                                 <Checkbox
-                                                    checked={checked[2] && checked[1]}
-                                                    indeterminate={checked[2] !== checked[1]}
-                                                    onChange={handleChange}
+                                                    checked={checked.every((item) => item)}
+                                                    indeterminate={determineIndeterminate()}
+                                                    onChange={handleParentChange}
                                                 />
                                             }
                                         />
-                                        {children}
-                                    </Grid>
+                                    )}
+                                    <Box sx={{display: 'flex', flexDirection: 'column', ml: 3}}>
+                                        {items.slice(1).map((item, index) => (
+                                            <FormControlLabel
+                                                key={index + 1}
+                                                label={item}
+                                                control={
+                                                    <Checkbox
+                                                        checked={checked[index + 1]}
+                                                        onChange={(e) => handleChange(e, index + 1)}
+                                                    />
+                                                }
+                                            />
+                                        ))}
+                                    </Box>
                                     <Grid item xs={12}>
                                         <Button variant="contained" fullWidth>Button 2</Button>
                                     </Grid>
@@ -112,8 +156,14 @@ function MyCalendar() {
                         events={myEvents}
                         startAccessor="start"
                         endAccessor="end"
+                        toolbar={true}
                         views={['month']}
-                        style={{width: '94%', height: "94%", margin: "3%"}}
+                        onNavigate={onNavigate}
+                        onSelectSlot={onSelectSlot}
+                        selectable
+                        date={dateValue}
+                        dayPropGetter={date => (moment(date).format('DD') === moment(dateValue).format('DD')) && ({className: 'rbc-selected-day'})}
+                        style={{width: '100%', height: "100%"}}
                     />
                 </Grid>
             </Grid>

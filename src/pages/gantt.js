@@ -1,61 +1,67 @@
 import React, {useEffect, useState} from 'react';
-import GanttComp from '../component/GanttComp';
 import GanttChart from "../component/GanttComp";
+import Box from "@mui/material/Box";
+import Sidebar from "@component/GanttSide";
+import moment from "moment";
+import dayjs from "dayjs";
 
 export default function Gantt() {
+    const initialTasks = [
+        {
+            name: 'Task 1',
+            start: '2024-05-01',
+            end: '2024-05-05',
+            editTime: '2024-05-02T12:00',
+            completePercentage: 50,
+            alarmTime: '2024-05-04T10:00'
+        },
+        {
+            name: 'Task 2',
+            start: '2024-05-03',
+            end: '2024-05-08',
+            editTime: '2024-05-04T09:00',
+            completePercentage: 30,
+            alarmTime: '2024-05-07T14:00'
+        },
+        {
+            name: 'Task 3',
+            start: '2024-05-07',
+            end: '2024-05-10',
+            editTime: '2024-05-08T16:00',
+            completePercentage: 70,
+            alarmTime: '2024-05-09T08:00'
+        }
+    ];
+    const [tasks, setTasks] = useState(initialTasks);
+    const [startDate, setStartDate] = useState(dayjs('2024-05-01'));
+    const [endDate, setEndDate] = useState(dayjs('2024-05-10'));
 
-    const [ganttData, setGanttData] = useState(null);
+    const handleDateChange = (field, value) => {
+        if (field === 'start') setStartDate(value);
+        if (field === 'end') setEndDate(value);
+    };
 
-    useEffect(() => {
-        const fetchData = async () => {
-            // Simulate async data loading
-            const tasks = [
-                [
-                    { type: 'string', label: 'Task ID' },
-                    { type: 'string', label: 'Task Name' },
-                    { type: 'date', label: 'Start Date' },
-                    { type: 'date', label: 'End Date' },
-                    { type: 'number', label: 'Duration' },
-                    { type: 'number', label: 'Percent Complete' },
-                    { type: 'string', label: 'Dependencies' },
-                ],
-                [
-                    'Task1',
-                    'Task 1',
-                    new Date(2023, 4, 1),
-                    new Date(2023, 4, 5),
-                    null,
-                    100,
-                    null,
-                ],
-                [
-                    'Task2',
-                    'Task 2',
-                    new Date(2023, 4, 6),
-                    new Date(2023, 4, 10),
-                    null,
-                    50,
-                    'Task1',
-                ],
-                [
-                    'Task3',
-                    'Task 3',
-                    new Date(2023, 4, 11),
-                    new Date(2023, 4, 15),
-                    null,
-                    0,
-                    'Task2',
-                ],
-            ];
-            setGanttData(tasks);
+    const handleAddTask = () => {
+        const newTask = {
+            name: `New Task ${tasks.length + 1}`,
+            start: startDate.toISOString().split('T')[0],
+            end: endDate.toISOString().split('T')[0],
+            completePercentage: 0,
+            color: 'blue'
         };
-
-        fetchData().then(r => console.log("Gantt data fetched"));
-    }, []);
+        setTasks([...tasks, newTask]);
+    };
 
     return (
-        <div>
-            {ganttData ? <GanttChart data={ganttData} /> : 'Loading...'}
-        </div>
+        <Box sx={{display: 'flex', height: "calc(-64px + 100vh)"}}>
+            <GanttChart tasks={tasks}/>
+            <Sidebar
+                tasks={tasks}
+                startDate={startDate}
+                endDate={endDate}
+                onDateChange={handleDateChange}
+                onAddTask={handleAddTask}
+            />
+        </Box>
     )
 }

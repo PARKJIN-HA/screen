@@ -1,0 +1,6 @@
+.gantt-head {
+    background-color: var(--primary-color);
+    color: var(--white);
+    padding: 10px;
+    text-align: center;
+}
