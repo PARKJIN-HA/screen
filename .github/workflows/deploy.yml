@@ -52,12 +52,6 @@ jobs:
           echo "SSH_USERNAME: ${{ secrets.SSH_USERNAME }}"
           echo "SSH_HOST: ${{ secrets.SSH_HOST }}"
 
-      - name: Test SSH Connection
-        env:
-          SSH_AUTH_SOCK: ${{ steps.ssh-agent-setup.outputs.ssh-auth-sock }}
-        run: |
-          ssh -o StrictHostKeyChecking=no -T "${{ secrets.SSH_USERNAME }}"@mikeds.dev:24607 "echo SSH connection successful"
-
       - name: Deploy to Server
         env:
           SSH_AUTH_SOCK: ${{ steps.ssh-agent-setup.outputs.ssh-auth-sock }}
