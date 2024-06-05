@@ -11,6 +11,8 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import dayjs from "dayjs";
 import {useSearchParams} from "react-router-dom";
+import Dialog from "@mui/material/Dialog";
+import GroupAddDialog from "@component/GroupAddDialog";
 
 // 로컬라이저 설정
 const localizer = momentLocalizer(moment);
@@ -65,11 +67,6 @@ function MyCalendar() {
         setSmallDateValue(moment(dateValue).subtract(1, 'month').startOf('month'))
     }, [dateValue]);
 
-    const handleChange = (event, index) => {
-        const newChecked = [...checked];
-        newChecked[index] = event.target.checked;
-        setChecked(newChecked);
-    };
     const onSelectSlot = useCallback((slotInfo) => {
         window.clearTimeout(clickRef?.current)
         clickRef.current = window.setTimeout(() => {
@@ -145,8 +142,8 @@ function MyCalendar() {
                                             />
                                         ))
                                     )}
-                                    <Button onClick={addGroup}>그룹 추가</Button>
                                 </Grid>
+                                <GroupAddDialog />
                             </AccordionDetails>
                         </Accordion>
                     </Box>

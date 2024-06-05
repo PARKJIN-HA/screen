@@ -5,7 +5,6 @@ import TodoList from '@pages/todo';
 import MyCalendar from "./pages/calendar";
 import Main from "@pages/main";
 import Gantt from "@pages/gantt";
-import LogoutPage from "@pages/logout";
 import LoginPage from "@pages/login";
 import {Cookies} from "react-cookie";
 
@@ -24,10 +23,6 @@ const router = createBrowserRouter([
                 path: "login",
                 element: <LoginPage />,
                 loader: loginLoader,
-            },
-            {
-                path: "logout",
-                element: <LogoutPage/>,
             },
             {
                 path: "todo",
