@@ -13,10 +13,11 @@ COPY . ./
 
 RUN npm run build
 
+RUN ls -l /app
+RUN ls -l /app/build
+
 # Stage 2: Serve the React application using nginx
 FROM nginx:alpine
-CMD ["ls", "/app"]
-CMD ["ls", "/app/build"]
 COPY --from=build /app/build /usr/share/nginx/html
 
 EXPOSE 80
