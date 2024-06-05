@@ -47,11 +47,6 @@ jobs:
           eval $(ssh-agent -s)
           echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add private_key
 
-      - name: Print Environment Variables
-        run: |
-          echo "SSH_USERNAME: ${{ secrets.SSH_USERNAME }}"
-          echo "SSH_HOST: ${{ secrets.SSH_HOST }}"
-
       - name: Deploy to Server
         env:
           SSH_AUTH_SOCK: ${{ steps.ssh-agent-setup.outputs.ssh-auth-sock }}
