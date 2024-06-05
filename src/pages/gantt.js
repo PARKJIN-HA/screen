@@ -102,7 +102,7 @@ export default function Gantt() {
                 body: JSON.stringify(updatedTask)
             });
             const data = await response.json();
-            console.log(data);
+            // console.log(data);
             setTasks(tasks.map(task => task.id === data.id ? data : task));
         } catch (error) {
             console.error('Error updating task:', error);
