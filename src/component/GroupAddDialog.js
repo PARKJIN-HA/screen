@@ -7,20 +7,10 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
-export default function GroupAddDialog() {
-    const [open, setOpen] = React.useState(false);
-
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
-
-    const handleClose = () => {
-        setOpen(false);
-    };
-
+export default function GroupAddDialog({ open, handleClose, handleOpen, handleSubmit }) {
     return (
         <React.Fragment>
-            <Button onClick={handleClickOpen} style={{width: "100%"}}>
+            <Button onClick={handleOpen} style={{width: "100%"}}>
                 Create Group
             </Button>
             <Dialog
@@ -28,14 +18,7 @@ export default function GroupAddDialog() {
                 onClose={handleClose}
                 PaperProps={{
                     component: 'form',
-                    onSubmit: (event) => {
-                        event.preventDefault();
-                        const formData = new FormData(event.currentTarget);
-                        const formJson = Object.fromEntries(formData.entries());
-                        const email = formJson.email;
-                        console.log(email);
-                        handleClose();
-                    },
+                    onSubmit: handleSubmit,
                 }}
             >
                 <DialogTitle>Subscribe</DialogTitle>
@@ -57,8 +40,7 @@ export default function GroupAddDialog() {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
-                    <Button type="submit">Submit
-                    </Button>
+                    <Button type="submit">Submit</Button>
                 </DialogActions>
             </Dialog>
         </React.Fragment>

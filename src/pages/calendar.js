@@ -41,27 +41,127 @@ const myEvents = [
 ];
 
 function MyCalendar() {
-    const [items, setItems] = useState([]);
+    const [groups, setGroups] = useState([]);
     const [checked, setChecked] = useState([]);
     const [searchParams, setSearchParams] = useSearchParams();
     const defaultDate = searchParams.get("date");
     const [dateValue, setDateValue] = useState(moment(defaultDate || new Date()));
     const [smallDateValue, setSmallDateValue] = useState(moment());
     const clickRef = useRef(null);
+    const [groupOpen, setGroupOpen] = useState(false);
+    const [events, setEvents] = useState(myEvents);
+
+    const handleOpen = () => {
+        setGroupOpen(true);
+    }
+
+    const handleClose = () => {
+        setGroupOpen(false);
+    }
+
+    const handleGrpSubmit = async (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const formJson = Object.fromEntries(formData.entries());
+        const groupName = formJson.name;
+
+        try {
+            const response = await fetch('http://localhost:9000/api/groups', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({name: groupName})
+            });
+
+            if (response.ok) {
+                setGroups([...groups, groupName]);
+                console.log('Group saved successfully');
+                handleClose();
+            } else {
+                console.error('Failed to save group');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const formJson = Object.fromEntries(formData.entries());
+        const title = formJson.title;
+        const start = formJson.start;
+        const end = formJson.end;
+        const groupId = formJson.group;
+
+        try {
+            const response = await fetch('http://localhost:9000/api/schedules', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({title, start, end, groupId})
+            });
+
+            if (response.ok) {
+                console.log('Event saved successfully');
+            } else {
+                console.error('Failed to save event');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
 
     // Fetch items from API
     useEffect(() => {
-        fetch('http://localhost:9000/api/items')  // Replace with your API endpoint
+        fetch('http://localhost:9000/api/groups', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+        })
             .then(response => {
-                setItems(response.data);
-                setChecked(new Array(response.data.length).fill(false));
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Failed to fetch items');
             })
-            .catch(error => {
-                setItems(["1번 그룹", "2번 그룹", "3번 그룹"]);
-                setChecked(new Array(items.length).fill(false));
-                console.error('Error fetching items:', error);
+            .then(data => {
+                console.log(data);
+                setGroups(data);
+                setChecked(new Array(data.length).fill(false));
             });
-    }, [setItems, setChecked]);
+    }, [setGroups, setChecked]);
+
+    useEffect(() => {
+        fetch('http://localhost:9000/api/schedules', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Failed to fetch items');
+            })
+            .then(data => {
+                console.log(data);
+                setEvents(data.map(event => ({
+                    title: event.title,
+                    start: new Date(event.start),
+                    end: new Date(event.end),
+                    resourceId: event.groupId
+                })));
+            });
+    }, [setGroups, setChecked]);
 
     useEffect(() => {
         setSmallDateValue(moment(dateValue).subtract(1, 'month').startOf('month'))
@@ -92,7 +192,7 @@ function MyCalendar() {
     )
 
     const addGroup = () => {
-        setItems([...items, `${items.length + 1}번 그룹`]);
+        setGroups([...groups, `${groups.length + 1}번 그룹`]);
         setChecked([...checked, false]);
     }
 
@@ -107,11 +207,11 @@ function MyCalendar() {
                         justifyContent: "center",
                         alignItems: "center"
                     }}>
-                        <FormDialog/>
+                        <FormDialog groups={groups} handleSubmit={handleSubmit}/>
                     </div>
                     <Calendar
                         localizer={localizer}
-                        events={myEvents}
+                        events={events}
                         date={smallDateValue}
                         onNavigate={onSmallNavigate}
                         toolbar={true}
@@ -131,11 +231,12 @@ function MyCalendar() {
                             </AccordionSummary>
                             <AccordionDetails>
                                 <Grid container display={"flex"} flexDirection={"column"}>
-                                    {items.length > 0 && (
-                                        items.map((item, index) => (
+                                    {groups.length > 0 && (
+                                        groups.map((item, index) => (
                                             <FormControlLabel
                                                 key={index}
-                                                label={item}
+                                                value={item.id}
+                                                label={item.name}
                                                 control={
                                                     <Checkbox/>
                                                 }
@@ -143,7 +244,8 @@ function MyCalendar() {
                                         ))
                                     )}
                                 </Grid>
-                                <GroupAddDialog />
+                                <GroupAddDialog open={groupOpen} handleClose={handleClose} handleOpen={handleOpen}
+                                                handleSubmit={handleGrpSubmit}/>
                             </AccordionDetails>
                         </Accordion>
                     </Box>
@@ -151,7 +253,7 @@ function MyCalendar() {
                 <Grid item xs={10}>
                     <Calendar
                         localizer={localizer}
-                        events={myEvents}
+                        events={events}
                         startAccessor="start"
                         endAccessor="end"
                         toolbar={true}

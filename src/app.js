@@ -244,7 +244,6 @@ export default function App() {
                             <Box display={"flex"} flexDirection={"column"} alignItems={"flex-start"}
                                  justifyContent={"space-evenly"} width={"70%"}>
                                 <Typography variant={"h6"} sx={{fontWeight: 600}}>{cookies.get("USERNAME")}</Typography>
-                                <Typography>{cookies.get("GROUP") || "Member"}</Typography>
                                 <Box>
                                     <Button onClick={handleLogout}>Logout</Button>
                                 </Box>

@@ -13,9 +13,10 @@ import "../public/css/calendar.css"
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 
-export default function CalDialog() {
+export default function CalDialog({ groups = [], handleSubmit}) {
     const [open, setOpen] = React.useState(false);
     const [repeat, setRepeat] = React.useState('None');
+    const [group, setGroup] = React.useState('');
 
     const handleChange = (event) => {
         setRepeat(event.target.value);
@@ -29,6 +30,10 @@ export default function CalDialog() {
         setOpen(false);
     };
 
+    const handleGrpChange = (event) => {
+        setGroup(event.target.value);
+    }
+
     return (
         <React.Fragment>
             <Button variant="contained" onClick={handleClickOpen}>
@@ -41,14 +46,7 @@ export default function CalDialog() {
                 onClose={handleClose}
                 PaperProps={{
                     component: 'form',
-                    onSubmit: (event) => {
-                        event.preventDefault();
-                        const formData = new FormData(event.currentTarget);
-                        const formJson = Object.fromEntries(formData.entries());
-                        const email = formJson.email;
-                        console.log(email);
-                        handleClose();
-                    },
+                    onSubmit: handleSubmit
                 }}
             >
                 <DialogContent>
@@ -103,6 +101,28 @@ export default function CalDialog() {
                             <Description sx={{color: 'action.active', mr: 1, my: 0.5}}/>
                             <TextField id="Description" label="Description" variant="standard"
                                        fullWidth/>
+                        </Box>
+
+                        <Box className={"textBox"}>
+                            <Repeat sx={{color: 'action.active', mr: 1, my: 0.5}}/>
+                            <FormControl fullWidth>
+                                <InputLabel id="Group">그룹 선택</InputLabel>
+                                <Select
+                                    labelId="Group"
+                                    id="Group"
+                                    value={group}
+                                    label="그룹 선택"
+                                    onChange={handleGrpChange}
+                                    fullWidth
+                                    displayEmpty
+                                    variant="standard"
+                                    size="small"
+                                >
+                                    {groups.map((item, index) => (
+                                        <MenuItem key={index} value={item.id}>{item.name}</MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
                         </Box>
 
                         <Box className={"textBox"}>
