@@ -153,7 +153,7 @@ export default function TodoComp({ date, todoList = initialTodoList, size = 3, b
                                 <ListItemText primary={`${value.name}`} />
                             </ListItemButton>
                         </ListItem>
-                        {value.toDoDetails.length > 0 && (
+                        {boxExisted && value.toDoDetails.length > 0 && (
                             <List component="div" disablePadding sx={{ pl: 4 }}>
                                 {value.toDoDetails.map((child) => (
                                     <ListItem key={child.id} disablePadding>
@@ -175,17 +175,6 @@ export default function TodoComp({ date, todoList = initialTodoList, size = 3, b
                         <Divider variant="middle" sx={{ width: "90%" }} />
                     </React.Fragment>
                 ))}
-                {!boxExisted &&
-                    <div style={{
-                        width: "100%",
-                        display: "flex",
-                        flexGrow: 1,
-                        justifyContent: "center",
-                        alignItems: "center"
-                    }}>
-                        <MoreVertIcon />
-                    </div>
-                }
             </List>
         </Grid>
     );

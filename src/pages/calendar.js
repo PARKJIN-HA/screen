@@ -22,21 +22,21 @@ const myEvents = [
     {
         title: 'Big Meeting',
         allDay: true,
-        start: new Date(2024, 3, 0),
-        end: new Date(2024, 3, 1),
+        start: new Date(2024, 5, 0),
+        end: new Date(2024, 5, 1),
         resourceId: 'r1',
     },
     {
         title: 'Vacation',
         allDay: true,
-        start: new Date(2024, 3, 7),
-        end: new Date(2024, 3, 10),
+        start: new Date(2024, 5, 7),
+        end: new Date(2024, 5, 10),
     },
     {
         title: 'Conference',
         allDay: true,
-        start: new Date(2024, 3, 20),
-        end: new Date(2024, 3, 23),
+        start: new Date(2024, 5, 20),
+        end: new Date(2024, 5, 23),
     },
 ];
 
@@ -233,14 +233,26 @@ function MyCalendar() {
                                 <Grid container display={"flex"} flexDirection={"column"}>
                                     {groups.length > 0 && (
                                         groups.map((item, index) => (
-                                            <FormControlLabel
-                                                key={index}
-                                                value={item.id}
-                                                label={item.name}
-                                                control={
-                                                    <Checkbox/>
-                                                }
-                                            />
+                                            <Box display={"flex"} flexDirection={"row"}>
+                                                <FormControlLabel
+                                                    key={index}
+                                                    value={item.id}
+                                                    label={item.name}
+                                                    sx={{width: "70%"}}
+                                                    control={
+                                                        <Checkbox/>
+                                                    }
+                                                />
+                                                <FormControlLabel
+                                                    key={index}
+                                                    value={item.id}
+                                                    label={"+"}
+                                                    sx={{width: "10%"}}
+                                                    control={
+                                                        <Button/>
+                                                    }
+                                                />
+                                            </Box>
                                         ))
                                     )}
                                 </Grid>

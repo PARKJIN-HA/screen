@@ -22,6 +22,11 @@
     text-align: center;
 }
 
+.gantt-chart-table > thead > tr > th:nth-child(3) {
+    background-color: var(--secondary-color);
+    color: var(--white);
+}
+
 .gantt-task-name-header {
     min-width: 100px;
     text-align: left;

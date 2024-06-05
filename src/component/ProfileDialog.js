@@ -61,7 +61,7 @@ export default function ProfileDialog({handleLogout}) {
                     <ListItemIcon>
                         <Settings fontSize="small"/>
                     </ListItemIcon>
-                    Group Change
+                    Group Setting
                 </MenuItem>
                 <MenuItem onClick={handleClose}>
                     <ListItemIcon>

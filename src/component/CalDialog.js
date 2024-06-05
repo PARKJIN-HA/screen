@@ -12,11 +12,14 @@ import {AddLocation, Article, Description, Groups, Repeat} from "@mui/icons-mate
 import "../public/css/calendar.css"
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
+import Checkbox from "@mui/material/Checkbox";
+import ListItemText from "@mui/material/ListItemText";
 
-export default function CalDialog({ groups = [], handleSubmit}) {
+export default function CalDialog({ groups = [], members = [], handleSubmit}) {
     const [open, setOpen] = React.useState(false);
     const [repeat, setRepeat] = React.useState('None');
     const [group, setGroup] = React.useState('');
+    const [member, setMember] = React.useState('');
 
     const handleChange = (event) => {
         setRepeat(event.target.value);
@@ -32,6 +35,10 @@ export default function CalDialog({ groups = [], handleSubmit}) {
 
     const handleGrpChange = (event) => {
         setGroup(event.target.value);
+    }
+
+    const handleMbmChange = (event) => {
+        setMember(event.target.value);
     }
 
     return (
@@ -126,9 +133,28 @@ export default function CalDialog({ groups = [], handleSubmit}) {
                         </Box>
 
                         <Box className={"textBox"}>
-                            <Groups sx={{color: 'action.active', mr: 1, my: 0.5}}/>
-                            <TextField id="Member" label="Member" variant="standard"
-                                       fullWidth/>
+                            <Repeat sx={{color: 'action.active', mr: 1, my: 0.5}}/>
+                            <FormControl fullWidth>
+                                <InputLabel id="Member">멤버 선택</InputLabel>
+                                <Select
+                                    labelId="Member"
+                                    id="Member"
+                                    value={member}
+                                    label="멤버 선택"
+                                    onChange={handleMbmChange}
+                                    fullWidth
+                                    displayEmpty
+                                    variant="standard"
+                                    size="small"
+                                >
+                                    {members.map((item, index) => (
+                                        <MenuItem key={index} value={item.name} sx={{display: "flex", flexDirection: "row"}}>
+                                            <Checkbox checked={members.indexOf(item) > -1} />
+                                            <ListItemText primary={item.name} />
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
                         </Box>
 
                         <Box className={"textBox"}>
