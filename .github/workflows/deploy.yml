@@ -31,10 +31,10 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
-        run: docker build -f ./frontend/Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/frontend:latest ./frontend
+        run: docker build -f ./Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/screen-frontend:latest
 
       - name: Push Docker image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/screen-frontend:latest
 
       - name: Deploy to Server
         uses: appleboy/ssh-action@master
@@ -43,5 +43,5 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            docker pull ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/screen-frontend:latest
             docker-compose -f /path/to/your/docker-compose.yml up -d frontend
