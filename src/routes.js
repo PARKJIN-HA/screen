@@ -1,6 +1,5 @@
 import React from 'react';
 import {createBrowserRouter, redirect, useFetcher, useRouteLoaderData} from 'react-router-dom';
-import {AuthProvider} from "./hooks/useAuth";
 import App from './app.js';
 import TodoList from '@pages/todo';
 import MyCalendar from "./pages/calendar";
@@ -8,30 +7,26 @@ import Main from "@pages/main";
 import Gantt from "@pages/gantt";
 import LogoutPage from "@pages/logout";
 import LoginPage from "@pages/login";
+import {Cookies} from "react-cookie";
 
 const router = createBrowserRouter([
     {
         id: "root",
         path: "/",
-        loader() {
-            return {user: AuthProvider.isAuthenticated ? AuthProvider.user : null};
-        },
         element: <App/>,
         children: [
             {
                 index: true,
-                path: "/",
                 element: <Main />,
                 loader: protectedLoader,
             },
             {
-                path: "/login",
+                path: "login",
                 element: <LoginPage />,
-                action: loginAction,
                 loader: loginLoader,
             },
             {
-                path: "/logout",
+                path: "logout",
                 element: <LogoutPage/>,
             },
             {
@@ -53,28 +48,51 @@ const router = createBrowserRouter([
     }
 ]);
 
-async function loginAction({}) {
-    try {
-        console.log("loginAction");
-        await AuthProvider.signIn();
-    } catch (error) {
-        return {
-            error: "Invalid login attempt",
-        };
+async function loginLoader() {
+    console.log('loginLoader')
+    const cookies = new Cookies();
+    const response = await fetch("http://localhost:9000/api/userinfo", {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+    });
+    if (response.status === 401) {
+        return null;
+    }
+    if (!response.ok) {
+        throw new Error('Network response was not ok.');
     }
 
-    return redirect("/");
-}
-
-async function loginLoader() {
-    if (AuthProvider.isAuthenticated) {
+    const data = await response.json();
+    if (data.username) {
+        cookies.set('USERNAME', data.username, { path: '/' });
+        cookies.set('email', data.email, { path: '/' });
         return redirect("/");
     }
     return null;
 }
 
-function protectedLoader({request}) {
-    if (!AuthProvider.isAuthenticated) {
+async function protectedLoader() {
+    console.log('protectedLoader')
+    const response = await fetch("http://localhost:9000/api/userinfo", {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+    });
+
+    if (!response.ok) {
+        return redirect("/login");
+    }
+
+    const data = await response.json();
+    console.log(data);
+    if (!data.username) {
         return redirect("/login");
     }
     return null;

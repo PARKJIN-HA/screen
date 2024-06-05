@@ -1,26 +1,55 @@
-import React, {useRef} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Form, redirect, useActionData, useFetcher, useLocation, useNavigate, useNavigation} from "react-router-dom";
 import {Container} from "@mui/material";
 import "../public/css/login.css";
 import Typography from "@mui/material/Typography";
-import {AuthProvider} from "../hooks/useAuth";
-import useScript from "../hooks/useScript";
+import {GoogleOAuthProvider, useGoogleLogin} from '@react-oauth/google';
+import {useCookies} from "react-cookie";
+
 
 export default function LoginPage() {
+    const [cookies, setCookie] = useCookies(['AUTH-TOKEN', 'USERNAME']);
+    const [isCookiesSet, setIsCookiesSet] = useState(false);
+    const navigate = useNavigate();
 
-    const googleSignInButton = useRef(null);
+    const googleLogin = useGoogleLogin({
+        onSuccess: async ({ code }) => {
+            try {
+                console.log('Google login successful, received code:', code);
 
-    const onGoogleSignIn = async (res) => {
-        const { credentials } = res;
-        await AuthProvider.signIn(credentials);
-    }
+                const response = await fetch('http://localhost:9000/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ idToken: code }), // Ensure the id_token is sent as JSON
+                });
 
-    useScript('https://accounts.google.com/gsi/client', () => {
-        window.google.accounts.id.initialize({
-            client_id: "711179595342-nkfve6rbulc846pmhdqteint0fch7jt5.apps.googleusercontent.com",
-            callback: onGoogleSignIn,
-        });
+                if (!response.ok) {
+                    console.error('Network response was not ok.', response);
+                    throw new Error('Network response was not ok.');
+                }
+
+                const data = await response.json();
+                console.log('Received data from server:', data);
+
+                setCookie('USERNAME', data.username, { path: '/' });
+                setIsCookiesSet(true);
+                // navigate('/');
+            } catch (error) {
+                alert('Login failed');
+                console.error('Error:', error);
+            }
+        },
+        flow: 'auth-code',
     });
+
+    useEffect(() => {
+        navigate('/');
+    }, [isCookiesSet])
+
 
     return (
         <Container style={{
@@ -32,7 +61,7 @@ export default function LoginPage() {
             height: "calc(100vh - 64px)"
         }}>
             <Typography variant="h4" style={{marginBottom: "1em"}}>Google login for process</Typography>
-            <button className="gsi-material-button" ref={googleSignInButton}>
+            <button className="gsi-material-button" onClick={() => googleLogin()}>
                 <div className="gsi-material-button-state"></div>
                 <div className="gsi-material-button-content-wrapper">
                     <div className="gsi-material-button-icon">

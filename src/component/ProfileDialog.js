@@ -10,11 +10,16 @@ import MenuItem from "@mui/material/MenuItem";
 import Divider from "@mui/material/Divider";
 import {Logout, PersonAdd, Settings} from "@mui/icons-material";
 import IconButton from "@mui/material/IconButton";
+import {useNavigate} from "react-router-dom";
+import {Cookies} from "react-cookie";
+import AccountCircle from "@mui/icons-material/AccountCircle";
 
-export default function ProfileDialog({}) {
-
+export default function ProfileDialog({handleLogout}) {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
+    const navigate = useNavigate();
+    const cookies = new Cookies();
+
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -49,22 +54,22 @@ export default function ProfileDialog({}) {
                 anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}
             >
                 <MenuItem onClick={handleClose} style={{justifyContent: "space-evenly"}}>
-                    <Avatar/> <Divider orientation={"vertical"} variant={"middle"} flexItem /> Profile
+                    <Avatar/>{cookies.get('USERNAME')}
                 </MenuItem>
                 <Divider/>
                 <MenuItem onClick={handleClose}>
                     <ListItemIcon>
-                        <PersonAdd fontSize="small"/>
+                        <Settings fontSize="small"/>
                     </ListItemIcon>
-                    Add another account
+                    Group Change
                 </MenuItem>
                 <MenuItem onClick={handleClose}>
                     <ListItemIcon>
-                        <Settings fontSize="small"/>
+                        <AccountCircle fontSize="small"/>
                     </ListItemIcon>
-                    Settings
+                    Profile
                 </MenuItem>
-                <MenuItem onClick={handleClose}>
+                <MenuItem onClick={handleLogout}>
                     <ListItemIcon>
                         <Logout fontSize="small"/>
                     </ListItemIcon>

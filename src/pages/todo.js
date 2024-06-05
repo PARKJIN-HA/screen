@@ -111,7 +111,7 @@ function TodoList() {
                 <Grid container spacing={0}>
                     {
                         Object.entries(mp).map(([date, todoList]) => {
-                            return <TodoComp key={date} date={date} todoList={todoList} size={2}/>
+                            return <TodoComp key={date} date={date} size={2}/>
                         })
                     }
                     <Grid item xs={2}>

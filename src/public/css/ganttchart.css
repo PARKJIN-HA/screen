@@ -1,47 +1,76 @@
 .gantt-chart {
-    height: 300px;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+    grid-template-rows: auto 1fr;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
 }
 
-.gantt-chart-header {
-    display: flex;
-    position: sticky;
-    top: 0;
-    background: #f0f0f0;
-    border-bottom: 1px solid #ccc;
+.gantt-chart-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.gantt-chart-table > thead > tr > th {
+    border-bottom: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    background: #f3f3f3;
+    padding: 20px 0;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.gantt-task-name-header {
+    min-width: 100px;
+    text-align: left;
+    padding: 5px;
+    background: #f3f3f3;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
 }
 
 .gantt-chart-day {
-    flex: 1;
-    padding: 5px;
+    min-width: 50px;
     text-align: center;
-    border-right: 1px solid #ccc;
-    box-sizing: border-box;
+    border-right: 1px solid #ddd;
+    background: #f3f3f3;
+    padding: 5px 0;
 }
 
-.gantt-chart-body {
-    position: relative;
-    flex-grow: 1;
-    height: calc(90% - 31px);
-}
-
-.gantt-task {
-    position: absolute;
-    top: 10px;
-    height: 20px;
+.gantt-task-name {
+    background: #f3f3f3;
+    padding: 5px;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
     text-align: left;
-    color: black;
-    line-height: 20px;
-    overflow: hidden;
-    border: 1px solid #ccc;
+}
+
+.gantt-task-cell {
+    min-width: 50px;
+    height: 40px;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    position: relative;
+}
+
+.task-day {
+    background-color: rgba(0, 128, 0, 0.1);
 }
 
 .gantt-task-inner {
-    height: 100%;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 128, 0, 0.5);
     color: white;
-    line-height: 20px;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+}
+
+/* Skeleton styles */
+.skeleton-cell {
+    /*background: #e0e0e0;*/
 }

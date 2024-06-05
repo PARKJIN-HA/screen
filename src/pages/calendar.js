@@ -4,12 +4,13 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import {Accordion, AccordionDetails, AccordionSummary, Grid} from "@mui/material";
 import Button from "@mui/material/Button";
-import FormDialog from "@component/CalDialogComp";
+import FormDialog from "@component/CalDialog";
 import Box from "@mui/material/Box";
 import {ExpandMore} from "@mui/icons-material";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import dayjs from "dayjs";
+import {useSearchParams} from "react-router-dom";
 
 // 로컬라이저 설정
 const localizer = momentLocalizer(moment);
@@ -19,16 +20,19 @@ const myEvents = [
     {
         title: 'Big Meeting',
         allDay: true,
-        start: new Date(2024, 3, 0), // 주의: 월은 0부터 시작합니다. 3은 4월을 의미합니다.
+        start: new Date(2024, 3, 0),
         end: new Date(2024, 3, 1),
+        resourceId: 'r1',
     },
     {
         title: 'Vacation',
+        allDay: true,
         start: new Date(2024, 3, 7),
         end: new Date(2024, 3, 10),
     },
     {
         title: 'Conference',
+        allDay: true,
         start: new Date(2024, 3, 20),
         end: new Date(2024, 3, 23),
     },
@@ -37,7 +41,10 @@ const myEvents = [
 function MyCalendar() {
     const [items, setItems] = useState([]);
     const [checked, setChecked] = useState([]);
-    const [dateValue, setDateValue] = useState(moment);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const defaultDate = searchParams.get("date");
+    const [dateValue, setDateValue] = useState(moment(defaultDate || new Date()));
+    const [smallDateValue, setSmallDateValue] = useState(moment());
     const clickRef = useRef(null);
 
     // Fetch items from API
@@ -48,11 +55,15 @@ function MyCalendar() {
                 setChecked(new Array(response.data.length).fill(false));
             })
             .catch(error => {
-                setItems(["Items 1", "Items 2", "Items 3"]);
+                setItems(["1번 그룹", "2번 그룹", "3번 그룹"]);
                 setChecked(new Array(items.length).fill(false));
                 console.error('Error fetching items:', error);
             });
     }, [setItems, setChecked]);
+
+    useEffect(() => {
+        setSmallDateValue(moment(dateValue).subtract(1, 'month').startOf('month'))
+    }, [dateValue]);
 
     const handleChange = (event, index) => {
         const newChecked = [...checked];
@@ -77,9 +88,24 @@ function MyCalendar() {
     }, [])
 
     const onNavigate = useCallback((newDate) => setDateValue(moment(newDate)), [setDateValue])
+    const onSmallNavigate = useCallback((newDate) => {
+        setSmallDateValue(moment(newDate))
+        setDateValue(moment(newDate).add(1, 'month'))
+    }, [setSmallDateValue])
+
+    const eventPropGetter = useCallback(
+        (event, start, end, isSelected) => ({
+            ...(event.resourceId === "r1" && {
+                style: {
+                    backgroundColor: '#000',
+                },
+            }),
+        }),
+        []
+    )
 
     return (
-        <div style={{display: "flex",  height: "calc(100vh - 64px)"}}>
+        <div style={{display: "flex", height: "calc(100vh - 64px)"}}>
             <Grid container spacing={1}>
                 <Grid item xs={2}>
                     <div style={{
@@ -94,16 +120,13 @@ function MyCalendar() {
                     <Calendar
                         localizer={localizer}
                         events={myEvents}
-                        startAccessor="start"
-                        endAccessor="end"
-                        toolbar={false}
+                        date={smallDateValue}
+                        onNavigate={onSmallNavigate}
+                        toolbar={true}
                         views={['month']}
-                        onNavigate={onNavigate}
-                        onSelectSlot={onSelectSlot}
-                        selectable
-                        date={dateValue}
-                        dayPropGetter={date => (moment(date).format('DD') === moment(dateValue).format('DD')) && ({className: 'rbc-selected-day'})}
+                        eventPropGetter={eventPropGetter}
                         style={{width: '100%', height: "30%"}}
+                        className="rbc-small-cal"
                     />
                     <Box style={{height: "60%"}}>
                         <Accordion>
@@ -112,39 +135,21 @@ function MyCalendar() {
                                 aria-controls="panel1-content"
                                 id="panel1-header"
                             >
-                                Accordion 1
+                                그룹 관리
                             </AccordionSummary>
                             <AccordionDetails>
                                 <Grid container display={"flex"} flexDirection={"column"}>
                                     {items.length > 0 && (
-                                        <FormControlLabel
-                                            label={items[0]}
-                                            control={
-                                                <Checkbox
-                                                    checked={checked.every((item) => item)}
-                                                    indeterminate={determineIndeterminate()}
-                                                    onChange={handleParentChange}
-                                                />
-                                            }
-                                        />
-                                    )}
-                                    <Box sx={{display: 'flex', flexDirection: 'column', ml: 3}}>
-                                        {items.slice(1).map((item, index) => (
+                                        items.map((item, index) => (
                                             <FormControlLabel
-                                                key={index + 1}
+                                                key={index}
                                                 label={item}
                                                 control={
-                                                    <Checkbox
-                                                        checked={checked[index + 1]}
-                                                        onChange={(e) => handleChange(e, index + 1)}
-                                                    />
+                                                    <Checkbox/>
                                                 }
                                             />
-                                        ))}
-                                    </Box>
-                                    <Grid item xs={12}>
-                                        <Button variant="contained" fullWidth>Button 2</Button>
-                                    </Grid>
+                                        ))
+                                    )}
                                 </Grid>
                             </AccordionDetails>
                         </Accordion>
@@ -163,6 +168,7 @@ function MyCalendar() {
                         selectable
                         date={dateValue}
                         dayPropGetter={date => (moment(date).format('DD') === moment(dateValue).format('DD')) && ({className: 'rbc-selected-day'})}
+                        eventPropGetter={eventPropGetter}
                         style={{width: '100%', height: "100%"}}
                     />
                 </Grid>

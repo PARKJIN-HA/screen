@@ -22,6 +22,8 @@ import {Link, useNavigate, useLocation} from 'react-router-dom';
 import ProfileDialog from "@component/ProfileDialog";
 import './public/css/App.css';
 import {Avatar, Popover} from "@mui/material";
+import {Cookies, useCookies} from "react-cookie";
+import Button from "@mui/material/Button";
 
 
 const drawerWidth = 240;
@@ -47,6 +49,7 @@ export default function App() {
 
     const isMenuOpen = Boolean(anchorEl);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+    const cookies = new Cookies();
 
     const handleNotiClick = (event) => {
         setAnchorNotiEl(event.currentTarget);
@@ -93,6 +96,27 @@ export default function App() {
                 return 'Gantt Chart';
             default:
                 return 'MUI'; // 기본값, 혹은 다른 경로를 추가할 수 있습니다.
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            const response = await fetch('http://localhost:9000/api/logout', {
+                method: 'POST',
+                credentials: 'include', // Ensure cookies are sent
+            });
+
+            if (response.ok) {
+                // Remove cookies
+                cookies.remove('AUTH-TOKEN', {path: '/'});
+                cookies.remove('USERNAME', {path: '/'});
+
+                navigate('/login');
+            } else {
+                console.error('Failed to log out');
+            }
+        } catch (error) {
+            console.error('Error logging out:', error);
         }
     };
 
@@ -151,7 +175,7 @@ export default function App() {
                         >
                             The content of the Popover.
                         </Popover>
-                        <ProfileDialog/>
+                        <ProfileDialog handleLogout={handleLogout}/>
                     </Box>
                     <Box sx={{display: {xs: 'flex', md: 'none'}}}>
                         <IconButton
@@ -180,7 +204,8 @@ export default function App() {
                 anchor="left"
                 open={hamburgerOpen}
             >
-                <Box style={{display: 'flex', flexDirection: 'column', justifyContent: "space-between", height: "100%"}}>
+                <Box
+                    style={{display: 'flex', flexDirection: 'column', justifyContent: "space-between", height: "100%"}}>
                     <Box>
                         <DrawerHeader>
                             <IconButton onClick={handleHamburgerClose}>
@@ -211,11 +236,21 @@ export default function App() {
                             {/* 추가적인 메뉴 항목을 여기에 삽입할 수 있습니다 */}
                         </List>
                     </Box>
-                    <Box>
-                        <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                            <Avatar/>
+                    {cookies.get("USERNAME") &&
+                        <Box height={"15%"} display={"flex"} flexDirection={"row"}>
+                            <Box display={"flex"} alignItems={"center"} justifyContent={"center"} width={"30%"}>
+                                <Avatar/>
+                            </Box>
+                            <Box display={"flex"} flexDirection={"column"} alignItems={"flex-start"}
+                                 justifyContent={"space-evenly"} width={"70%"}>
+                                <Typography variant={"h6"} sx={{fontWeight: 600}}>{cookies.get("USERNAME")}</Typography>
+                                <Typography>{cookies.get("GROUP") || "Member"}</Typography>
+                                <Box>
+                                    <Button onClick={handleLogout}>Logout</Button>
+                                </Box>
+                            </Box>
                         </Box>
-                    </Box>
+                    }
                 </Box>
             </Drawer>
             <Outlet/>

@@ -6,6 +6,8 @@ import TodoComp from "@component/TodoComp";
 import GanttChart from "@component/GanttComp";
 import Box from "@mui/material/Box";
 import "../public/css/main.css";
+import {navigate} from "react-big-calendar/lib/utils/constants";
+import {useNavigate} from "react-router-dom";
 
 export default function Main() {
     const localizer = momentLocalizer(moment);
@@ -15,56 +17,46 @@ export default function Main() {
     const [dateValue, setDateValue] = useState(moment);
     const [ganttData, setGanttData] = useState(null);
     const clickRef = useRef(null);
-
+    const navigate = useNavigate();
 
     const onSelectSlot = useCallback((slotInfo) => {
         window.clearTimeout(clickRef?.current)
         clickRef.current = window.setTimeout(() => {
             setDateValue(moment(slotInfo.start))
+            navigate(`/calendar?date=${moment(slotInfo.start).format('YYYY-MM-DD')}`, {replace: true});
         }, 100)
     }, [])
 
-    const onNavigate = useCallback((newDate) => setDateValue(moment(newDate)), [setDateValue])
+    const onNavigate = useCallback((newDate) => {
+        setDateValue(moment(newDate))
+        navigate(`/calendar?date=${moment(newDate).format('YYYY-MM-DD')}`, {replace: true});
+    }, [setDateValue])
+
+    const onTaskClick = (task) => {
+        navigate(`/gantt`, {replace: true});
+    }
 
     useEffect(() => {
-        const fetchData = async () => {
-            // Simulate async data loading
-            const tasks = [
-                {
-                    name: 'Task 1',
-                    start: '2024-05-01',
-                    end: '2024-05-05',
-                    editTime: '2024-05-02T12:00',
-                    completePercentage: 50,
-                    alarmTime: '2024-05-04T10:00'
-                },
-                {
-                    name: 'Task 2',
-                    start: '2024-05-03',
-                    end: '2024-05-08',
-                    editTime: '2024-05-04T09:00',
-                    completePercentage: 30,
-                    alarmTime: '2024-05-07T14:00'
-                },
-                {
-                    name: 'Task 3',
-                    start: '2024-05-07',
-                    end: '2024-05-10',
-                    editTime: '2024-05-08T16:00',
-                    completePercentage: 70,
-                    alarmTime: '2024-05-09T08:00'
-                }
-            ];
-            setGanttData(tasks);
-        };
-
-        fetchData();
+        fetch('http://localhost:9000/api/gantt', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+        })
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                setGanttData(data);
+            })
     }, []);
 
     return (
         <div style={{height: "calc(100vh - 64px)"}}>
             <Grid container spacing={2} padding={3} height={"100%"}>
-                <Grid item xs={4}>
+                <Grid item xs={4} style={{height:"100%"}}>
                     <Stack
                         direction="column"
                         justifyContent="space-evenly"
@@ -72,9 +64,12 @@ export default function Main() {
                         spacing={2}
                         style={{height: "100%"}}
                     >
-                        <div style={{width: "80%", height: "40%"}}>
+                        <div style={{
+                            width: "80%", height: "40%",
+                            border: "black solid 1px",
+                        }}>
                             <Box sx={{
-                                height: "20%",
+                                height: "19%",
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "flex-start",
@@ -86,7 +81,13 @@ export default function Main() {
                             }}>
                                 Today's To-Do
                             </Box>
-                            <TodoComp date={now} todoList={[0, 1, 2, 3]} size={12} boxExisted={false}/>
+                            <TodoComp date={now}
+                                      size={12}
+                                      boxExisted={false}
+                                      onClick={() => {
+                                          navigate(`/todo`, {replace: true});
+                                      }}
+                            />
                         </div>
                         <div style={{width: "80%", height: "60%"}}>
                             <Calendar
@@ -102,7 +103,7 @@ export default function Main() {
                         </div>
                     </Stack>
                 </Grid>
-                <Grid item xs={8}>
+                <Grid item xs={8} style={{height:"100%"}}>
                     <Box
                         width={"100%"}
                         height={"100%"}
@@ -112,7 +113,7 @@ export default function Main() {
                              alignItems={"center"} fontSize={"2em"} paddingLeft={"2em"}>
                             Working Process
                         </Box>
-                        {ganttData ? <GanttChart tasks={ganttData}/> : 'Loading...'}
+                        {ganttData ? <GanttChart tasks={ganttData} onTaskClick={onTaskClick}/> : 'Loading...'}
                     </Box>
                 </Grid>
             </Grid>

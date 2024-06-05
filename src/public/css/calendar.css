@@ -81,3 +81,23 @@
 .rbc-small-cal .rbc-event {
     height: 0;
 }
+
+.rbc-small-cal .rbc-btn-group {
+    display: none;
+}
+.rbc-small-cal .rbc-event-content {
+    display: none !important;
+}
+
+.textBox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.dialogGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 10px;
+}
