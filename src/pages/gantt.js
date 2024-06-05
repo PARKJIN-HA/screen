@@ -3,12 +3,9 @@ import GanttChart from "../component/GanttComp";
 import Box from "@mui/material/Box";
 import Sidebar from "@component/GanttSide";
 import moment from "moment";
-import dayjs from "dayjs";
-import {Cookies} from "react-cookie";
 import TaskDialog from "@component/GanttTaskDialog";
 
 export default function Gantt() {
-    const cookies = new Cookies();
     const initialTasks = [
         {
             title: 'Task 1',
