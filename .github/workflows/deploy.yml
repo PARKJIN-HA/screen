@@ -52,11 +52,17 @@ jobs:
           echo "SSH_USERNAME: ${{ secrets.SSH_USERNAME }}"
           echo "SSH_HOST: ${{ secrets.SSH_HOST }}"
 
+      - name: Test SSH Connection
+        env:
+          SSH_AUTH_SOCK: ${{ steps.ssh-agent-setup.outputs.ssh-auth-sock }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -t "${{ secrets.SSH_USERNAME }}"@"${{ secrets.SSH_HOST }}" "echo SSH connection successful"
+
       - name: Deploy to Server
         env:
           SSH_AUTH_SOCK: ${{ steps.ssh-agent-setup.outputs.ssh-auth-sock }}
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no "${{ secrets.SSH_USERNAME }}"@"${{ secrets.SSH_HOST }}" << 'EOF'
             docker pull ${{ secrets.DOCKER_USERNAME }}/frontend:latest
             docker-compose -f /path/to/your/docker-compose.yml up -d frontend
           EOF
