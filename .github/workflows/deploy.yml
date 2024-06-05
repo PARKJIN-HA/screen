@@ -36,24 +36,27 @@ jobs:
       - name: Push Docker image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/screen-frontend:latest
 
-      - name: Prepare SSH key
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
-          chmod 600 private_key
-
       - name: Start ssh-agent
-        id: ssh-agent-setup
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Debug SSH Agent
+        run: ssh-add -l
+
+      - name: Test SSH Connection
+        env:
+          SSH_AUTH_SOCK: $SSH_AUTH_SOCK
         run: |
-          eval $(ssh-agent -s)
-          echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add private_key
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} -t ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "echo SSH connection successful"
 
       - name: Deploy to Server
         env:
-          SSH_AUTH_SOCK: ${{ steps.ssh-agent-setup.outputs.ssh-auth-sock }}
+          SSH_AUTH_SOCK: $SSH_AUTH_SOCK
         run: |
-          ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} -t "${{ secrets.SSH_USERNAME }}"@"${{ secrets.SSH_HOST }}" << 'EOF'
-            docker pull ${{ secrets.DOCKER_USERNAME }}/screen-frontend:latest
-            docker-compose -f /path/to/your/docker-compose.yml up -d frontend
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} -t ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+          docker pull ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+          docker-compose -f /path/to/your/docker-compose.yml up -d frontend
           EOF
 
       - name: Clean up
