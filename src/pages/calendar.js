@@ -70,16 +70,6 @@ function MyCalendar() {
         newChecked[index] = event.target.checked;
         setChecked(newChecked);
     };
-
-    const handleParentChange = (event) => {
-        const newChecked = checked.map(() => event.target.checked);
-        setChecked(newChecked);
-    };
-
-    const determineIndeterminate = () => {
-        return checked.some((item) => item) && !checked.every((item) => item);
-    };
-
     const onSelectSlot = useCallback((slotInfo) => {
         window.clearTimeout(clickRef?.current)
         clickRef.current = window.setTimeout(() => {
@@ -103,6 +93,11 @@ function MyCalendar() {
         }),
         []
     )
+
+    const addGroup = () => {
+        setItems([...items, `${items.length + 1}번 그룹`]);
+        setChecked([...checked, false]);
+    }
 
     return (
         <div style={{display: "flex", height: "calc(100vh - 64px)"}}>
@@ -150,6 +145,7 @@ function MyCalendar() {
                                             />
                                         ))
                                     )}
+                                    <Button onClick={addGroup}>그룹 추가</Button>
                                 </Grid>
                             </AccordionDetails>
                         </Accordion>
