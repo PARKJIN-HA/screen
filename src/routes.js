@@ -58,7 +58,7 @@ async function loginLoader() {
         return null;
     }
     if (!response.ok) {
-        throw new Error('Network response was not ok.');
+        return null;
     }
 
     const data = await response.json();

@@ -6,13 +6,16 @@ import {Accordion, AccordionDetails, AccordionSummary, Grid} from "@mui/material
 import Button from "@mui/material/Button";
 import FormDialog from "@component/CalDialog";
 import Box from "@mui/material/Box";
-import {ExpandMore} from "@mui/icons-material";
+import {Add, ExpandMore, PlusOne, Settings} from "@mui/icons-material";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import dayjs from "dayjs";
 import {useSearchParams} from "react-router-dom";
 import Dialog from "@mui/material/Dialog";
 import GroupAddDialog from "@component/GroupAddDialog";
+import IconButton from "@mui/material/IconButton";
+import TaskDialog from "@component/GanttTaskDialog";
+import GroupSetDialog from "@component/GroupSetDialog";
 
 // 로컬라이저 설정
 const localizer = momentLocalizer(moment);
@@ -48,43 +51,25 @@ function MyCalendar() {
     const [dateValue, setDateValue] = useState(moment(defaultDate || new Date()));
     const [smallDateValue, setSmallDateValue] = useState(moment());
     const clickRef = useRef(null);
-    const [groupOpen, setGroupOpen] = useState(false);
+    const [grpAddOpen, setGrpAddOpen] = useState(false);
+    const [grpSetOpen, setGrpSetOpen] = useState(false);
+    const [selectedGrp, setSelectedGrp] = useState(null);
     const [events, setEvents] = useState(myEvents);
 
-    const handleOpen = () => {
-        setGroupOpen(true);
+    const handleGrpAddOpen = () => {
+        setGrpAddOpen(true);
     }
 
-    const handleClose = () => {
-        setGroupOpen(false);
+    const handleGrpAddClose = () => {
+        setGrpAddOpen(false);
     }
 
-    const handleGrpSubmit = async (event) => {
-        event.preventDefault();
-        const formData = new FormData(event.currentTarget);
-        const formJson = Object.fromEntries(formData.entries());
-        const groupName = formJson.name;
+    const handleGrpSetOpen = () => {
+        setGrpSetOpen(true);
+    }
 
-        try {
-            const response = await fetch('http://localhost:9000/api/groups', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify({name: groupName})
-            });
-
-            if (response.ok) {
-                setGroups([...groups, groupName]);
-                console.log('Group saved successfully');
-                handleClose();
-            } else {
-                console.error('Failed to save group');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        }
+    const handleGrpSetClose = () => {
+        setGrpSetOpen(false);
     }
 
     const handleSubmit = async (event) => {
@@ -114,6 +99,39 @@ function MyCalendar() {
         } catch (error) {
             console.error('Error:', error);
         }
+    }
+
+    const handleGrpSubmit = async (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const formJson = Object.fromEntries(formData.entries());
+        const groupName = formJson.name;
+
+        try {
+            const response = await fetch('http://localhost:9000/api/groups', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({name: groupName})
+            });
+
+            if (response.ok) {
+                console.log(groupName);
+                setGroups([...groups, groupName]);
+                console.log('Group saved successfully');
+                handleGrpAddClose();
+            } else {
+                console.error('Failed to save group');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    const handleGrpSetSubmit = async (event) => {
+
     }
 
     // Fetch items from API
@@ -191,11 +209,6 @@ function MyCalendar() {
         []
     )
 
-    const addGroup = () => {
-        setGroups([...groups, `${groups.length + 1}번 그룹`]);
-        setChecked([...checked, false]);
-    }
-
     return (
         <div style={{display: "flex", height: "calc(100vh - 64px)"}}>
             <Grid container spacing={1}>
@@ -233,9 +246,8 @@ function MyCalendar() {
                                 <Grid container display={"flex"} flexDirection={"column"}>
                                     {groups.length > 0 && (
                                         groups.map((item, index) => (
-                                            <Box display={"flex"} flexDirection={"row"}>
+                                            <Box key={index} display={"flex"} flexDirection={"row"}>
                                                 <FormControlLabel
-                                                    key={index}
                                                     value={item.id}
                                                     label={item.name}
                                                     sx={{width: "70%"}}
@@ -243,21 +255,25 @@ function MyCalendar() {
                                                         <Checkbox/>
                                                     }
                                                 />
-                                                <FormControlLabel
-                                                    key={index}
-                                                    value={item.id}
-                                                    label={"+"}
-                                                    sx={{width: "10%"}}
-                                                    control={
-                                                        <Button/>
-                                                    }
-                                                />
+                                                <IconButton
+                                                    onClick={() => {
+                                                        setSelectedGrp(item.id);
+                                                        setGrpSetOpen(true);
+                                                        console.log(item.id);
+                                                    }}
+                                                >
+                                                    <Settings/>
+                                                </IconButton>
                                             </Box>
                                         ))
                                     )}
                                 </Grid>
-                                <GroupAddDialog open={groupOpen} handleClose={handleClose} handleOpen={handleOpen}
+                                <GroupAddDialog open={grpAddOpen} handleClose={handleGrpAddClose}
+                                                handleOpen={handleGrpAddOpen}
                                                 handleSubmit={handleGrpSubmit}/>
+                                <GroupSetDialog open={grpSetOpen} handleClose={handleGrpSetClose}
+                                                group={selectedGrp}
+                                                handleSubmit={handleGrpSetSubmit}/>
                             </AccordionDetails>
                         </Accordion>
                     </Box>
