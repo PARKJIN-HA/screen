@@ -84,7 +84,7 @@ async function protectedLoader() {
     if (!response.ok) {
         return redirect("/login");
     }
-
+    console.log(response);
     const data = await response.json();
     console.log(data);
     if (!data.username) {

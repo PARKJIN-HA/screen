@@ -21,10 +21,10 @@ export default function GroupAddDialog({ open, handleClose, handleOpen, handleSu
                     onSubmit: handleSubmit,
                 }}
             >
-                <DialogTitle>Subscribe</DialogTitle>
+                <DialogTitle>Create Group</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Write Group Name
+                        Write Group Name and Find Members
                     </DialogContentText>
                     <TextField
                         autoFocus

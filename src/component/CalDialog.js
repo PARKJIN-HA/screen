@@ -14,23 +14,16 @@ import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import Checkbox from "@mui/material/Checkbox";
 import ListItemText from "@mui/material/ListItemText";
+import moment from "moment";
+import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
 
-export default function CalDialog({ groups = [], members = [], handleSubmit}) {
-    const [open, setOpen] = React.useState(false);
+export default function CalDialog({groups = [], members = [], open, handleOpen, handleClose, handleSubmit}) {
     const [repeat, setRepeat] = React.useState('None');
     const [group, setGroup] = React.useState('');
     const [member, setMember] = React.useState('');
 
     const handleChange = (event) => {
         setRepeat(event.target.value);
-    };
-
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
-
-    const handleClose = () => {
-        setOpen(false);
     };
 
     const handleGrpChange = (event) => {
@@ -43,7 +36,7 @@ export default function CalDialog({ groups = [], members = [], handleSubmit}) {
 
     return (
         <React.Fragment>
-            <Button variant="contained" onClick={handleClickOpen}>
+            <Button variant="contained" onClick={handleOpen}>
                 Create
             </Button>
             <Dialog
@@ -77,36 +70,48 @@ export default function CalDialog({ groups = [], members = [], handleSubmit}) {
                                 <Grid item xs={6} mb={2}>
                                     <Typography>Start:</Typography>
                                 </Grid>
-                                <Grid item xs={6} mb={2}>
-                                    <DateTimePicker
-                                        format="YYYY-MM-DD HH:mm"
-                                        size="small"
-                                        fullWidth
-                                    />
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <Typography>End:</Typography>
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <DateTimePicker
-                                        style={{width: "100%"}}
-                                        format="YYYY-MM-DD HH:mm"
-                                        size="small"
-                                        fullWidth
-                                    />
-                                </Grid>
+                                <LocalizationProvider dateAdapter={AdapterMoment}>
+                                    <Grid item xs={6} mb={2}>
+                                        <DateTimePicker
+                                            id={"start"}
+                                            name={"start"}
+                                            format="YYYY-MM-DD HH:mm"
+                                            size="small"
+                                            defaultValue={moment()}
+                                            fullWidth
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <Typography>End:</Typography>
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <DateTimePicker
+                                            id={"end"}
+                                            name={"end"}
+                                            style={{width: "100%"}}
+                                            format="YYYY-MM-DD HH:mm"
+                                            size="small"
+                                            defaultValue={moment().add(1, "week").clone()}
+                                            fullWidth
+                                        />
+                                    </Grid>
+                                </LocalizationProvider>
                             </Grid>
                         </LocalizationProvider>
 
                         <Box className={"textBox"}>
                             <AddLocation sx={{color: 'action.active', mr: 1, my: 0.5}}/>
-                            <TextField id="Location" label="Location" variant="standard"
+                            <TextField id="Location"
+                                       name={"location"}
+                                       label="Location" variant="standard"
                                        fullWidth/>
                         </Box>
 
                         <Box className={"textBox"}>
                             <Description sx={{color: 'action.active', mr: 1, my: 0.5}}/>
-                            <TextField id="Description" label="Description" variant="standard"
+                            <TextField id="Description"
+                                       name={"description"}
+                                       label="Description" variant="standard"
                                        fullWidth/>
                         </Box>
 
@@ -117,6 +122,7 @@ export default function CalDialog({ groups = [], members = [], handleSubmit}) {
                                 <Select
                                     labelId="Group"
                                     id="Group"
+                                    name={"group"}
                                     value={group}
                                     label="그룹 선택"
                                     onChange={handleGrpChange}
@@ -148,9 +154,10 @@ export default function CalDialog({ groups = [], members = [], handleSubmit}) {
                                     size="small"
                                 >
                                     {members.map((item, index) => (
-                                        <MenuItem key={index} value={item.name} sx={{display: "flex", flexDirection: "row"}}>
-                                            <Checkbox checked={members.indexOf(item) > -1} />
-                                            <ListItemText primary={item.name} />
+                                        <MenuItem key={index} value={item.name}
+                                                  sx={{display: "flex", flexDirection: "row"}}>
+                                            <Checkbox checked={members.indexOf(item) > -1}/>
+                                            <ListItemText primary={item.name}/>
                                         </MenuItem>
                                     ))}
                                 </Select>
@@ -196,5 +203,6 @@ export default function CalDialog({ groups = [], members = [], handleSubmit}) {
                 </DialogActions>
             </Dialog>
         </React.Fragment>
-    );
+    )
+        ;
 }

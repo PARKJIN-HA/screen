@@ -51,6 +51,7 @@ function MyCalendar() {
     const [dateValue, setDateValue] = useState(moment(defaultDate || new Date()));
     const [smallDateValue, setSmallDateValue] = useState(moment());
     const clickRef = useRef(null);
+    const [open, setOpen] = useState(false);
     const [grpAddOpen, setGrpAddOpen] = useState(false);
     const [grpSetOpen, setGrpSetOpen] = useState(false);
     const [selectedGrp, setSelectedGrp] = useState(null);
@@ -72,14 +73,36 @@ function MyCalendar() {
         setGrpSetOpen(false);
     }
 
+    const handleOpen = () => {
+        setOpen(true);
+    }
+    const handleClose = () => {
+        setOpen(false);
+    }
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
         const formJson = Object.fromEntries(formData.entries());
         const title = formJson.title;
-        const start = formJson.start;
-        const end = formJson.end;
+        const start = moment(formJson.start).toISOString();
+        const end = moment(formJson.end).toISOString();
+        const location = formJson.location;
+        // const description = formJson.description;
         const groupId = formJson.group;
+        const document = formJson.document;
+
+        let body = {
+            title: title,
+            start: start,
+            end: end,
+            location: location,
+            // description: description,
+            groupId: parseInt(groupId),
+            document: document
+        }
+
+        console.log(body);
 
         try {
             const response = await fetch('http://localhost:9000/api/schedules', {
@@ -88,11 +111,20 @@ function MyCalendar() {
                     'Content-Type': 'application/json'
                 },
                 credentials: 'include',
-                body: JSON.stringify({title, start, end, groupId})
+                body: JSON.stringify(body)
             });
 
             if (response.ok) {
                 console.log('Event saved successfully');
+                const newEvent = await response.json();
+                setEvents([...events, {
+                    title: newEvent.title,
+                    start: moment(newEvent.start),
+                    end: moment(newEvent.end),
+                    resourceId: newEvent.groupId
+                }]);
+                console.log(events);
+                handleClose()
             } else {
                 console.error('Failed to save event');
             }
@@ -118,9 +150,8 @@ function MyCalendar() {
             });
 
             if (response.ok) {
-                console.log(groupName);
-                setGroups([...groups, groupName]);
-                console.log('Group saved successfully');
+                const newGroup = await response.json();
+                setGroups([...groups, newGroup]);
                 handleGrpAddClose();
             } else {
                 console.error('Failed to save group');
@@ -131,8 +162,52 @@ function MyCalendar() {
     }
 
     const handleGrpSetSubmit = async (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const formJson = Object.fromEntries(formData.entries());
+        const groupName = formJson.name;
 
-    }
+        try {
+            const response = await fetch(`http://localhost:9000/api/groups/${selectedGrp.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({name: groupName})
+            });
+
+            if (response.ok) {
+                setGroups(groups.map(group => (group.id === selectedGrp.id ? {...group, name: groupName} : group)));
+                handleGrpSetClose();
+            } else {
+                console.error('Failed to update group');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+
+    const handleGrpSetDel = async () => {
+        try {
+            const response = await fetch(`http://localhost:9000/api/groups/${selectedGrp.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                setGroups(groups.filter(group => group.id !== selectedGrp.id));
+                handleGrpSetClose();
+            } else {
+                console.error('Failed to delete group');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
 
     // Fetch items from API
     useEffect(() => {
@@ -171,7 +246,7 @@ function MyCalendar() {
                 throw new Error('Failed to fetch items');
             })
             .then(data => {
-                console.log(data);
+                console.log("Schedule", data);
                 setEvents(data.map(event => ({
                     title: event.title,
                     start: new Date(event.start),
@@ -200,7 +275,7 @@ function MyCalendar() {
 
     const eventPropGetter = useCallback(
         (event, start, end, isSelected) => ({
-            ...(event.resourceId === "r1" && {
+            ...(event.groupId === "r1" && {
                 style: {
                     backgroundColor: '#000',
                 },
@@ -220,7 +295,11 @@ function MyCalendar() {
                         justifyContent: "center",
                         alignItems: "center"
                     }}>
-                        <FormDialog groups={groups} handleSubmit={handleSubmit}/>
+                        <FormDialog groups={groups}
+                                    open={open}
+                                    handleOpen={handleOpen}
+                                    handleClose={handleClose}
+                                    handleSubmit={handleSubmit}/>
                     </div>
                     <Calendar
                         localizer={localizer}
@@ -251,15 +330,18 @@ function MyCalendar() {
                                                     value={item.id}
                                                     label={item.name}
                                                     sx={{width: "70%"}}
+                                                    checked={checked[item.id]}
+                                                    onChange={(e) => {
+                                                        setChecked({...checked, [item.id]: e.target.checked});
+                                                    }}
                                                     control={
                                                         <Checkbox/>
                                                     }
                                                 />
                                                 <IconButton
                                                     onClick={() => {
-                                                        setSelectedGrp(item.id);
+                                                        setSelectedGrp({id: item.id, name: item.name});
                                                         setGrpSetOpen(true);
-                                                        console.log(item.id);
                                                     }}
                                                 >
                                                     <Settings/>
@@ -268,11 +350,14 @@ function MyCalendar() {
                                         ))
                                     )}
                                 </Grid>
-                                <GroupAddDialog open={grpAddOpen} handleClose={handleGrpAddClose}
+                                <GroupAddDialog open={grpAddOpen}
+                                                handleClose={handleGrpAddClose}
                                                 handleOpen={handleGrpAddOpen}
                                                 handleSubmit={handleGrpSubmit}/>
-                                <GroupSetDialog open={grpSetOpen} handleClose={handleGrpSetClose}
+                                <GroupSetDialog open={grpSetOpen}
                                                 group={selectedGrp}
+                                                handleClose={handleGrpSetClose}
+                                                handleDelete={handleGrpSetDel}
                                                 handleSubmit={handleGrpSetSubmit}/>
                             </AccordionDetails>
                         </Accordion>
