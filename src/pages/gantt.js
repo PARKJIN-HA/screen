@@ -51,7 +51,7 @@ export default function Gantt() {
                 return response.json();
             })
             .then(data => {
-                console.log(data);
+                console.log("gantt" + JSON.stringify(data));
                 setTasks(data);
             })
     }, [])

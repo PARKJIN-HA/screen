@@ -27,7 +27,7 @@ const myEvents = [
         allDay: true,
         start: new Date(2024, 5, 0),
         end: new Date(2024, 5, 1),
-        resourceId: 'r1',
+        groupId: 'r1',
     },
     {
         title: 'Vacation',
@@ -45,7 +45,7 @@ const myEvents = [
 
 function MyCalendar() {
     const [groups, setGroups] = useState([]);
-    const [checked, setChecked] = useState([]);
+    const [checked, setChecked] = useState({});
     const [searchParams, setSearchParams] = useSearchParams();
     const defaultDate = searchParams.get("date");
     const [dateValue, setDateValue] = useState(moment(defaultDate || new Date()));
@@ -117,13 +117,8 @@ function MyCalendar() {
             if (response.ok) {
                 console.log('Event saved successfully');
                 const newEvent = await response.json();
-                setEvents([...events, {
-                    title: newEvent.title,
-                    start: moment(newEvent.start),
-                    end: moment(newEvent.end),
-                    resourceId: newEvent.groupId
-                }]);
-                console.log(events);
+                setEvents([...events, newEvent]);
+                console.log(events, JSON.stringify(newEvent));
                 handleClose()
             } else {
                 console.error('Failed to save event');
@@ -227,7 +222,7 @@ function MyCalendar() {
             .then(data => {
                 console.log(data);
                 setGroups(data);
-                setChecked(new Array(data.length).fill(false));
+                setChecked({...checked, ...Object.fromEntries(data.map(group => [group.id, false]))});
             });
     }, [setGroups, setChecked]);
 
@@ -251,10 +246,14 @@ function MyCalendar() {
                     title: event.title,
                     start: new Date(event.start),
                     end: new Date(event.end),
-                    resourceId: event.groupId
+                    groupId: event.groupId
                 })));
             });
     }, [setGroups, setChecked]);
+
+    useEffect(() => {
+        console.log("checked after update: ", JSON.stringify(checked));
+    }, [checked]);
 
     useEffect(() => {
         setSmallDateValue(moment(dateValue).subtract(1, 'month').startOf('month'))
@@ -274,14 +273,19 @@ function MyCalendar() {
     }, [setSmallDateValue])
 
     const eventPropGetter = useCallback(
-        (event, start, end, isSelected) => ({
-            ...(event.groupId === "r1" && {
+        (event, start, end, isSelected) => {
+            // console.log(`Processing event '${event.title}' with groupId '${event.groupId}'`);
+            // console.log(`Current checked state: `, JSON.stringify(checked));
+            // console.log(`Checked state for groupId '${event.groupId}': ${checked[event.groupId]}`);
+            return {...(!checked[event.groupId] && {
                 style: {
-                    backgroundColor: '#000',
+                    display: "none",
                 },
             }),
-        }),
-        []
+            }
+        },
+
+        [checked]
     )
 
     return (
@@ -335,7 +339,9 @@ function MyCalendar() {
                                                         setChecked({...checked, [item.id]: e.target.checked});
                                                     }}
                                                     control={
-                                                        <Checkbox/>
+                                                        <Checkbox
+                                                            checked={checked[item.id] !== undefined ? checked[item.id] : false}
+                                                        />
                                                     }
                                                 />
                                                 <IconButton

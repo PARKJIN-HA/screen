@@ -28,6 +28,7 @@
 }
 
 .gantt-task-name-header {
+    width: 10%;
     min-width: 100px;
     text-align: left;
     padding: 5px;
