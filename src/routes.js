@@ -58,6 +58,7 @@ async function loginLoader() {
         cookies.remove('USERNAME', { path: '/' });
         return null;
     }
+
     if (!response.ok) {
         cookies.remove('USERNAME', { path: '/' });
         return null;

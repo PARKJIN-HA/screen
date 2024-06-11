@@ -27,20 +27,10 @@ export default function CalDialog({
                                       handleDelete,
                                       handleSubmit
                                   }) {
-    const [repeat, setRepeat] = React.useState('None');
     const [group, setGroup] = React.useState('');
-    const [member, setMember] = React.useState('');
-
-    const handleChange = (event) => {
-        setRepeat(event.target.value);
-    };
 
     const handleGrpChange = (event) => {
         setGroup(event.target.value);
-    }
-
-    const handleMbmChange = (event) => {
-        setMember(event.target.value);
     }
 
     return (
@@ -70,7 +60,7 @@ export default function CalDialog({
                             margin="dense"
                             id="title"
                             name="title"
-                            value={selectedEvent ? selectedEvent.title : ""}
+                            defaultValue={selectedEvent ? selectedEvent.title : ""}
                             label="Add title"
                             fullWidth
                             variant="standard"
@@ -115,7 +105,7 @@ export default function CalDialog({
                             <AddLocation sx={{color: 'action.active', mr: 1, my: 0.5}}/>
                             <TextField id="Location"
                                        name={"location"}
-                                       value={selectedEvent ? selectedEvent.location : ""}
+                                       defaultValue={selectedEvent ? selectedEvent.location : ""}
                                        label="Location" variant="standard"
                                        fullWidth/>
                         </Box>
@@ -124,7 +114,7 @@ export default function CalDialog({
                             <Description sx={{color: 'action.active', mr: 1, my: 0.5}}/>
                             <TextField id="Description"
                                        name={"description"}
-                                       value={selectedEvent ? selectedEvent.description : ""}
+                                       defaultValue={selectedEvent ? selectedEvent.description : ""}
                                        label="Description" variant="standard"
                                        fullWidth/>
                         </Box>

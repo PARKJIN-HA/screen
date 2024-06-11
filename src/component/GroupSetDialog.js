@@ -81,6 +81,34 @@ export default function GroupSetDialog({
             });
     }
 
+    const handleInvite = () => {
+        const email = document.getElementById("member").value;
+        if (!email) {
+            alert("Please enter the email of the member you want to invite")
+            return;
+        }
+        fetch(`http://localhost:9000/api/groups/${group.id}/join-request`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: email
+        })
+            .then(response => {
+                if (!response.ok) {
+                    alert('Failed to invite the member');
+                    return;
+                }
+                if (response.status === 400) {
+                    alert("The user you want to invite is already a member of the group")
+                    return;
+                }
+                alert('Successfully invited the member');
+                handleClose();
+            })
+    }
+
     return (
         <React.Fragment>
             <Dialog
@@ -145,15 +173,20 @@ export default function GroupSetDialog({
                             <Typography>
                                 Invite Group Member
                             </Typography>
-                            <TextField
-                                margin="dense"
-                                id="member"
-                                name="member"
-                                label="Member Email"
-                                type="email"
-                                fullWidth
-                                variant="standard"
+                            <Box display={"flex"}>
+                                <TextField
+                                    margin="dense"
+                                    id="member"
+                                    name="member"
+                                    label="Member Email"
+                                    type="email"
+                                    variant="standard"
+                                    sx={{flexGrow: 1}}
                                 />
+                                <Button size={"small"} onClick={handleInvite}>
+                                    Invite
+                                </Button>
+                            </Box>
                         </Box>
                     </Box>
                 </DialogContent>

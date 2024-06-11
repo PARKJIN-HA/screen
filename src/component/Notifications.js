@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from "react";
 import {
     Button,
     Popover,
@@ -15,9 +15,15 @@ import {
 } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import SockJS from "sockjs-client";
-import { Client } from "@stomp/stompjs";
+import {Client} from "@stomp/stompjs";
 import Badge from "@mui/material/Badge";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import ListItemButton from "@mui/material/ListItemButton";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogActions from "@mui/material/DialogActions";
 
 export default function Notifications() {
     const [anchorNotiEl, setAnchorNotiEl] = useState(null);
@@ -27,12 +33,11 @@ export default function Notifications() {
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [tabIndex, setTabIndex] = useState(0);
+    const [openJoin, setOpenJoin] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState(null);
 
     useEffect(() => {
         fetchReadNotifications();
-    }, []);
-
-    useEffect(() => {
         fetchUnreadNotifications(page);
     }, [page]);
 
@@ -45,8 +50,10 @@ export default function Notifications() {
             heartbeatOutgoing: 4000,
         });
 
+        let subscription;
+
         stompClient.onConnect = (frame) => {
-            stompClient.subscribe('http://localhost:9000/topic/notifications', (message) => {
+            subscription = stompClient.subscribe('http://localhost:9000/topic/notifications', (message) => {
                 const notification = JSON.parse(message.body);
                 setUnreadNotifications((prev) => [notification, ...prev]);
                 alert(`New notification: ${notification.message}`);
@@ -56,6 +63,9 @@ export default function Notifications() {
         stompClient.activate();
 
         return () => {
+            if (subscription) {
+                subscription.unsubscribe();
+            }
             stompClient.deactivate();
         };
     }, []);
@@ -69,6 +79,26 @@ export default function Notifications() {
     const handleNotiClose = () => {
         setAnchorNotiEl(null);
     };
+
+    const handleJoinClose = () => {
+        setOpenJoin(false);
+    }
+
+    const handleJoinAgree = () => {
+        try {
+            console.log(selectedEvent.userGroup.id)
+            fetch(`http://localhost:9000/api/groups/${selectedEvent.userGroup.id}/accept-request`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+            });
+            setOpenJoin(false);
+        } catch (error) {
+            console.error('Error joining event', error);
+        }
+    }
 
     const fetchReadNotifications = async () => {
         try {
@@ -86,8 +116,12 @@ export default function Notifications() {
             const response = await fetch(`http://localhost:9000/api/notifications/unread?page=${page}&size=10`, {credentials: 'include'});
             if (!response.ok) throw new Error('Failed to fetch unread notifications');
             const data = await response.json();
-            setUnreadNotifications((prev) => [...prev, ...data.content]);
             setHasMore(!data.last);
+            if (!hasMore) {
+                setUnreadNotifications((prev) => [...prev, ...data.content]);
+            } else {
+                setUnreadNotifications(data.content);
+            }
         } catch (error) {
             console.error('Error fetching unread notifications', error);
         }
@@ -121,12 +155,20 @@ export default function Notifications() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, [handleScroll]);
 
+    const handleNotificationClick = (event) => {
+        if (event.type === 0 ) {
+            setSelectedEvent(event);
+            setOpenJoin(true);
+        }
+        console.log(event)
+    }
+
     const handleTabChange = (event, newValue) => {
         setTabIndex(newValue);
     };
 
     return (
-        <Box>
+        <>
             <IconButton
                 size="large"
                 aria-label="show 17 new notifications"
@@ -134,7 +176,7 @@ export default function Notifications() {
                 onClick={handleNotiClick}
                 aria-describedby={"noti-popover"}
             >
-                <Badge badgeContent={unreadNotifications ? unreadNotifications.totalElements : 0} color="error">
+                <Badge badgeContent={unreadNotifications ? unreadNotifications.length : 0} color="error">
                     <NotificationsIcon/>
                 </Badge>
             </IconButton>
@@ -152,7 +194,7 @@ export default function Notifications() {
                     horizontal: 'right',
                 }}
             >
-                <Box sx={{ width: 300, maxHeight: 500 }}>
+                <Box sx={{width: 300, maxHeight: 500}}>
                     <Tabs
                         value={tabIndex}
                         onChange={handleTabChange}
@@ -160,23 +202,22 @@ export default function Notifications() {
                         textColor="primary"
                         variant="fullWidth"
                     >
-                        <Tab label="Unread" />
-                        <Tab label="Read" />
+                        <Tab label="Unread"/>
+                        <Tab label="Read"/>
                     </Tabs>
                     <Box p={2}>
                         {tabIndex === 0 && (
                             <List>
-                                {unreadNotifications.map((notification) => (
-                                    <ListItem key={notification.id} button>
-                                        <ListItemText primary={notification.message} />
+                                {unreadNotifications.map((notification, index) => (
+                                    <ListItemButton key={index} onClick={() => handleNotificationClick(notification)}>
+                                        <ListItemText primary={notification.message}/>
                                         <ListItemSecondaryAction>
                                             <Checkbox
                                                 edge="end"
                                                 onChange={() => markAsRead(notification.id)}
-                                                checked={false}
-                                            />
+                                                checked={false}/>
                                         </ListItemSecondaryAction>
-                                    </ListItem>
+                                    </ListItemButton>
                                 ))}
                             </List>
                         )}
@@ -184,19 +225,40 @@ export default function Notifications() {
                             <List>
                                 {readNotifications.map((notification) => (
                                     <ListItem key={notification.id}>
-                                        <ListItemText primary={notification.message} />
+                                        <ListItemText primary={notification.message}/>
                                         <ListItemSecondaryAction>
                                             <IconButton edge="end" aria-label="delete">
-                                                <DeleteIcon />
+                                                <DeleteIcon/>
                                             </IconButton>
                                         </ListItemSecondaryAction>
                                     </ListItem>
                                 ))}
                             </List>
                         )}
+                        <Dialog
+                            open={openJoin}
+                            onClose={handleJoinClose}
+                            aria-labelledby="alert-dialog-title"
+                            aria-describedby="alert-dialog-description"
+                        >
+                            <DialogTitle id="alert-dialog-title">
+                                {"Join Request Arrived"}
+                            </DialogTitle>
+                            <DialogContent>
+                                <DialogContentText id="alert-dialog-description">
+                                    {selectedEvent? selectedEvent.message : ""}
+                                </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={handleJoinClose}>Disagree</Button>
+                                <Button onClick={handleJoinAgree} autoFocus>
+                                    Agree
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
                     </Box>
                 </Box>
             </Popover>
-        </Box>
+        </>
     );
 }
