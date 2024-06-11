@@ -44,18 +44,19 @@ const myEvents = [
 ];
 
 function MyCalendar() {
-    const [groups, setGroups] = useState([]);
-    const [checked, setChecked] = useState({});
     const [searchParams, setSearchParams] = useSearchParams();
     const defaultDate = searchParams.get("date");
+    const [groups, setGroups] = useState([]);
+    const [checked, setChecked] = useState({});
     const [dateValue, setDateValue] = useState(moment(defaultDate || new Date()));
     const [smallDateValue, setSmallDateValue] = useState(moment());
-    const clickRef = useRef(null);
     const [open, setOpen] = useState(false);
     const [grpAddOpen, setGrpAddOpen] = useState(false);
     const [grpSetOpen, setGrpSetOpen] = useState(false);
     const [selectedGrp, setSelectedGrp] = useState(null);
     const [events, setEvents] = useState(myEvents);
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const clickRef = useRef(null);
 
     const handleGrpAddOpen = () => {
         setGrpAddOpen(true);
@@ -161,6 +162,9 @@ function MyCalendar() {
         const formData = new FormData(event.currentTarget);
         const formJson = Object.fromEntries(formData.entries());
         const groupName = formJson.name;
+        const inviteMember = formJson.member;
+
+        console.log("inviteMember", inviteMember);
 
         try {
             const response = await fetch(`http://localhost:9000/api/groups/${selectedGrp.id}`, {
@@ -169,7 +173,7 @@ function MyCalendar() {
                     'Content-Type': 'application/json'
                 },
                 credentials: 'include',
-                body: JSON.stringify({name: groupName})
+                body: JSON.stringify({name: groupName, inviteMember: inviteMember})
             });
 
             if (response.ok) {
@@ -252,8 +256,14 @@ function MyCalendar() {
     }, [setGroups, setChecked]);
 
     useEffect(() => {
-        console.log("checked after update: ", JSON.stringify(checked));
-    }, [checked]);
+        console.log(JSON.stringify(groups));
+        if (groups.length > 0) {
+            groups.map((group) => {
+                console.log(group.id, group.groupMembers)
+            })
+            console.log(groups[0].id);
+        }
+    }, [groups]);
 
     useEffect(() => {
         setSmallDateValue(moment(dateValue).subtract(1, 'month').startOf('month'))
@@ -264,6 +274,15 @@ function MyCalendar() {
         clickRef.current = window.setTimeout(() => {
             setDateValue(moment(slotInfo.start))
         }, 100)
+    }, [])
+
+    const onSelectEvent = useCallback((calEvent) => {
+        window.clearTimeout(clickRef?.current)
+        clickRef.current = window.setTimeout(() => {
+            console.log(calEvent)
+            setSelectedEvent(calEvent)
+            setOpen(true)
+        }, 250)
     }, [])
 
     const onNavigate = useCallback((newDate) => setDateValue(moment(newDate)), [setDateValue])
@@ -300,6 +319,7 @@ function MyCalendar() {
                         alignItems: "center"
                     }}>
                         <FormDialog groups={groups}
+                                    selectedEvent={selectedEvent}
                                     open={open}
                                     handleOpen={handleOpen}
                                     handleClose={handleClose}
@@ -346,7 +366,7 @@ function MyCalendar() {
                                                 />
                                                 <IconButton
                                                     onClick={() => {
-                                                        setSelectedGrp({id: item.id, name: item.name});
+                                                        setSelectedGrp(groups[index]);
                                                         setGrpSetOpen(true);
                                                     }}
                                                 >
@@ -379,6 +399,7 @@ function MyCalendar() {
                         views={['month']}
                         onNavigate={onNavigate}
                         onSelectSlot={onSelectSlot}
+                        onSelectEvent={onSelectEvent}
                         selectable
                         date={dateValue}
                         dayPropGetter={date => (moment(date).format('DD') === moment(dateValue).format('DD')) && ({className: 'rbc-selected-day'})}

@@ -113,7 +113,7 @@ export default function Main() {
                              alignItems={"center"} fontSize={"2em"} paddingLeft={"2em"}>
                             Working Process
                         </Box>
-                        {ganttData ? <GanttChart tasks={ganttData} onTaskClick={onTaskClick}/> : 'Loading...'}
+                        {ganttData ? <GanttChart tasks={ganttData} onTaskClick={onTaskClick} height={"90%"}/> : 'Loading...'}
                     </Box>
                 </Grid>
             </Grid>

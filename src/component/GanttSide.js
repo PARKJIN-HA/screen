@@ -17,10 +17,15 @@ import moment from "moment";
 import dayjs from "dayjs";
 import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
 
-const Sidebar = ({tasks, startDate, endDate, onDateChange, onAddTask}) => {
+const Sidebar = ({tasks, startDate, endDate, onDateChange, onAddTask, setOpen}) => {
     return (
         <Box sx={{padding: 2, borderLeft: '1px solid #ccc', width: '200px'}}>
-            <Button variant="contained" color="primary" onClick={onAddTask}>ADD</Button>
+            <Box display={"flex"} flexDirection={"row"} justifyContent={"space-evenly"}>
+                <Button variant="contained" color="primary" onClick={() => {
+                    setOpen(true)
+                }}>Create</Button>
+                <Button variant="contained" color="primary" onClick={onAddTask}>ADD</Button>
+            </Box>
             <Typography variant="h6" sx={{marginTop: 2}}>TaskList</Typography>
             <List style={{
                 height: "60%",

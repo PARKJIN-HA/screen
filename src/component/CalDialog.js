@@ -17,7 +17,16 @@ import ListItemText from "@mui/material/ListItemText";
 import moment from "moment";
 import {AdapterMoment} from "@mui/x-date-pickers/AdapterMoment";
 
-export default function CalDialog({groups = [], members = [], open, handleOpen, handleClose, handleSubmit}) {
+export default function CalDialog({
+                                      groups = [],
+                                      members = [],
+                                      selectedEvent = [],
+                                      open,
+                                      handleOpen,
+                                      handleClose,
+                                      handleDelete,
+                                      handleSubmit
+                                  }) {
     const [repeat, setRepeat] = React.useState('None');
     const [group, setGroup] = React.useState('');
     const [member, setMember] = React.useState('');
@@ -61,6 +70,7 @@ export default function CalDialog({groups = [], members = [], open, handleOpen, 
                             margin="dense"
                             id="title"
                             name="title"
+                            value={selectedEvent ? selectedEvent.title : ""}
                             label="Add title"
                             fullWidth
                             variant="standard"
@@ -78,6 +88,7 @@ export default function CalDialog({groups = [], members = [], open, handleOpen, 
                                             format="YYYY-MM-DD HH:mm"
                                             size="small"
                                             defaultValue={moment()}
+                                            value={selectedEvent ? moment(selectedEvent.start) : moment()}
                                             fullWidth
                                         />
                                     </Grid>
@@ -92,6 +103,7 @@ export default function CalDialog({groups = [], members = [], open, handleOpen, 
                                             format="YYYY-MM-DD HH:mm"
                                             size="small"
                                             defaultValue={moment().add(1, "week").clone()}
+                                            value={selectedEvent ? moment(selectedEvent.end) : moment().add(1, "week").clone()}
                                             fullWidth
                                         />
                                     </Grid>
@@ -103,6 +115,7 @@ export default function CalDialog({groups = [], members = [], open, handleOpen, 
                             <AddLocation sx={{color: 'action.active', mr: 1, my: 0.5}}/>
                             <TextField id="Location"
                                        name={"location"}
+                                       value={selectedEvent ? selectedEvent.location : ""}
                                        label="Location" variant="standard"
                                        fullWidth/>
                         </Box>
@@ -111,6 +124,7 @@ export default function CalDialog({groups = [], members = [], open, handleOpen, 
                             <Description sx={{color: 'action.active', mr: 1, my: 0.5}}/>
                             <TextField id="Description"
                                        name={"description"}
+                                       value={selectedEvent ? selectedEvent.description : ""}
                                        label="Description" variant="standard"
                                        fullWidth/>
                         </Box>
@@ -123,6 +137,7 @@ export default function CalDialog({groups = [], members = [], open, handleOpen, 
                                     labelId="Group"
                                     id="Group"
                                     name={"group"}
+                                    defaultValue={selectedEvent ? selectedEvent.groupId : ""}
                                     value={group}
                                     label="그룹 선택"
                                     onChange={handleGrpChange}
@@ -137,68 +152,11 @@ export default function CalDialog({groups = [], members = [], open, handleOpen, 
                                 </Select>
                             </FormControl>
                         </Box>
-
-                        <Box className={"textBox"}>
-                            <Repeat sx={{color: 'action.active', mr: 1, my: 0.5}}/>
-                            <FormControl fullWidth>
-                                <InputLabel id="Member">멤버 선택</InputLabel>
-                                <Select
-                                    labelId="Member"
-                                    id="Member"
-                                    value={member}
-                                    label="멤버 선택"
-                                    onChange={handleMbmChange}
-                                    fullWidth
-                                    displayEmpty
-                                    variant="standard"
-                                    size="small"
-                                >
-                                    {members.map((item, index) => (
-                                        <MenuItem key={index} value={item.name}
-                                                  sx={{display: "flex", flexDirection: "row"}}>
-                                            <Checkbox checked={members.indexOf(item) > -1}/>
-                                            <ListItemText primary={item.name}/>
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Box>
-
-                        <Box className={"textBox"}>
-                            <Article sx={{color: 'action.active', mr: 1, my: 0.5}}/>
-                            <TextField id="Document" label="Document" variant="standard"
-                                       fullWidth/>
-                        </Box>
-
-                        <Box className={"textBox"}>
-                            <Repeat sx={{color: 'action.active', mr: 1, my: 0.5}}/>
-                            <FormControl fullWidth>
-                                <InputLabel id="Repeat">반복 여부</InputLabel>
-                                <Select
-                                    labelId="Repeat"
-                                    id="Repeat"
-                                    value={repeat}
-                                    label="반복 여부"
-                                    onChange={handleChange}
-                                    fullWidth
-                                    displayEmpty
-                                    variant="standard"
-                                    size="small"
-                                >
-                                    <MenuItem value="None">
-                                        <em>반복 안함</em>
-                                    </MenuItem>
-                                    <MenuItem value={"Day"}>매일</MenuItem>
-                                    <MenuItem value={"Week"}>매주</MenuItem>
-                                    <MenuItem value={"Month"}>매월</MenuItem>
-                                    <MenuItem value={"Year"}>매년</MenuItem>
-                                </Select>
-                            </FormControl>
-                        </Box>
                     </Grid>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
+                    <Button onClick={handleDelete}>Delete</Button>
                     <Button type="submit">Subscribe</Button>
                 </DialogActions>
             </Dialog>

@@ -9,8 +9,78 @@ import DialogTitle from '@mui/material/DialogTitle';
 import {FormControl, InputLabel, Select} from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Divider from "@mui/material/Divider";
+import {useEffect} from "react";
 
-export default function GroupSetDialog({open, handleClose, handleOpen, handleSubmit, handleDelete, group = {id: 0, name: ""}}) {
+export default function GroupSetDialog({
+                                           open,
+                                           handleClose,
+                                           handleOpen,
+                                           handleSubmit,
+                                           handleDelete,
+                                           group = {
+                                               "id": 1,
+                                               "name": "placeholder",
+                                               "owner": {
+                                                   "id": 1,
+                                                   "username": "admin",
+                                                   "email": "admin@admin@.com",
+                                                   "role": null,
+                                                   "password": null
+                                               },
+                                               "groupMembers": [1],
+                                               "schedules": [1, 2],
+                                               "ownerId": 1
+                                           }
+                                       }) {
+    const [groupMembers, setGroupMembers] = React.useState([]);
+
+    useEffect(() => {
+        if (!group) {
+            return;
+        }
+        if (group.groupMembers === []) {
+            setGroupMembers([])
+            return;
+        }
+
+        fetch(`http://localhost:9000/api/user/${group.groupMembers}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                setGroupMembers(data);
+            });
+    }, [group])
+
+    const handleMemberDelete = (memberId) => {
+        if (!memberId) {
+            return;
+        }
+        if (memberId === group.owner.id) {
+            alert("You can't delete the owner of the group")
+            return;
+        }
+        fetch(`http://localhost:9000/api/user/${memberId}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data)
+                // Remove the deleted member from the groupMembers state
+                setGroupMembers(groupMembers.filter(member => member.id !== memberId));
+            });
+    }
+
     return (
         <React.Fragment>
             <Dialog
@@ -20,6 +90,7 @@ export default function GroupSetDialog({open, handleClose, handleOpen, handleSub
                     component: 'form',
                     onSubmit: handleSubmit,
                 }}
+                fullWidth
             >
                 <DialogTitle>Group Setting</DialogTitle>
                 <DialogContent>
@@ -41,19 +112,49 @@ export default function GroupSetDialog({open, handleClose, handleOpen, handleSub
                                 variant="standard"
                             />
                         </FormControl>
-                        {/*<FormControl>*/}
-                        {/*    <InputLabel id="group-label">Group</InputLabel>*/}
-                        {/*    <Select*/}
-                        {/*        labelId="group-label"*/}
-                        {/*        value={group}*/}
-                        {/*        onChange={handleOpen}*/}
-                        {/*        label="Group"*/}
-                        {/*    >*/}
-                        {/*        <MenuItem value={"10"}>Ten</MenuItem>*/}
-                        {/*        <MenuItem value={"20"}>Twenty</MenuItem>*/}
-                        {/*        <MenuItem value={"30"}>Thirty</MenuItem>*/}
-                        {/*    </Select>*/}
-                        {/*</FormControl>*/}
+                        <Box marginY={2} textAlign={"center"}>
+                            <Typography>
+                                Group Owner: {group ? group.owner.username : ''}
+                            </Typography>
+                        </Box>
+                        <Divider/>
+                        <Box>
+                            {/* We need to do listing group's member*/}
+                            <Box marginY={2} textAlign={"center"}>
+                                <Typography>
+                                    Group Members
+                                </Typography>
+                            </Box>
+                            <Box display={"flex"} flexDirection={"column"}>
+                                {
+                                    groupMembers ? groupMembers.map((member, index) => (
+                                        <Box key={index} display={"flex"} justifyContent={"space-between"} marginY={1}>
+                                            <Typography>
+                                                {member.username}
+                                            </Typography>
+                                            <Button onClick={() => handleMemberDelete(member.id)}>
+                                                Delete
+                                            </Button>
+                                        </Box>
+                                    )) : null
+                                }
+                            </Box>
+                        </Box>
+                        <Divider/>
+                        <Box marginY={2} textAlign={"center"}>
+                            <Typography>
+                                Invite Group Member
+                            </Typography>
+                            <TextField
+                                margin="dense"
+                                id="member"
+                                name="member"
+                                label="Member Email"
+                                type="email"
+                                fullWidth
+                                variant="standard"
+                                />
+                        </Box>
                     </Box>
                 </DialogContent>
                 <DialogActions>

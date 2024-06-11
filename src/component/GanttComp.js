@@ -7,7 +7,7 @@ import {ChevronLeft} from "@mui/icons-material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
-const GanttChart = ({tasks, onTaskClick}) => {
+const GanttChart = ({tasks, onTaskClick, height = "100%"}) => {
     // const chartStartDate = moment().subtract(1, 'days');
     // const chartEndDate = moment().add(13, 'days');
     const [chartStartDate, setChartStartDate] = useState(moment().subtract(1, 'days'));
@@ -44,7 +44,7 @@ const GanttChart = ({tasks, onTaskClick}) => {
     }, [updateSkeletonRows]);
 
     return (
-        <Box display="flex" flexDirection={"column"} width={"90%"}>
+        <Box display="flex" flexDirection={"column"} width={"100%"} height={height}>
             <Box className={"gantt-header"}>
                 <IconButton className={"gantt-header-icon"} onClick={() => {
                     setChartStartDate(moment(chartStartDate).subtract(1, 'week'));

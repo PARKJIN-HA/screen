@@ -30,14 +30,13 @@ export default function Gantt() {
             editTime: '2024-05-08T16:00',
             progress: 70,
             alarmTime: '2024-05-09T08:00'
-        }
+        },
     ];
     const [tasks, setTasks] = useState(initialTasks);
     const [startDate, setStartDate] = useState(moment());
     const [endDate, setEndDate] = useState(moment().add(7, "days"));
     const [selectedTask, setSelectedTask] = useState(null);
     const [open, setOpen] = useState(false);
-
 
     useEffect(() => {
         fetch('http://localhost:9000/api/gantt', {
@@ -118,6 +117,7 @@ export default function Gantt() {
                 tasks={tasks}
                 startDate={startDate}
                 endDate={endDate}
+                open={setOpen}
                 onDateChange={handleDateChange}
                 onAddTask={handleAddTask}
             />

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {styled, useTheme} from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -24,6 +24,9 @@ import './public/css/App.css';
 import {Avatar, Popover} from "@mui/material";
 import {Cookies, useCookies} from "react-cookie";
 import Button from "@mui/material/Button";
+import {Client, Stomp} from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
+import Notifications from "@component/Notifications";
 
 
 const drawerWidth = 240;
@@ -40,7 +43,6 @@ const DrawerHeader = styled('div')(({theme}) => ({
 export default function App() {
     const theme = useTheme();
     const [anchorEl, setAnchorEl] = useState(null);
-    const [anchorNotiEl, setAnchorNotiEl] = useState(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
     const [hamburgerOpen, setHamburgerOpen] = useState(false);
     const location = useLocation();
@@ -50,16 +52,6 @@ export default function App() {
     const isMenuOpen = Boolean(anchorEl);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
     const cookies = new Cookies();
-
-    const handleNotiClick = (event) => {
-        setAnchorNotiEl(event.currentTarget);
-    };
-
-    const handleNotiClose = () => {
-        setAnchorNotiEl(null);
-    };
-
-    const openNoti = Boolean(anchorNotiEl);
 
     const handleMobileMenuClose = () => {
         setMobileMoreAnchorEl(null);
@@ -95,7 +87,7 @@ export default function App() {
             case '/gantt':
                 return 'Gantt Chart';
             default:
-                return 'MUI'; // 기본값, 혹은 다른 경로를 추가할 수 있습니다.
+                return 'Login'; // 기본값, 혹은 다른 경로를 추가할 수 있습니다.
         }
     };
 
@@ -147,36 +139,12 @@ export default function App() {
                         </Link>
                     </Typography>
                     <Box sx={{flexGrow: 1}}/>
-                    <Box sx={{display: {xs: 'none', md: 'flex'}}}>
-                        <IconButton
-                            size="large"
-                            aria-label="show 17 new notifications"
-                            color="inherit"
-                            onClick={handleNotiClick}
-                            aria-describedby={"noti-popover"}
-                        >
-                            <Badge badgeContent={17} color="error">
-                                <NotificationsIcon/>
-                            </Badge>
-                        </IconButton>
-                        <Popover
-                            id={"noti-popover"}
-                            open={openNoti}
-                            anchorEl={anchorNotiEl}
-                            onClose={handleNotiClose}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'right',
-                            }}
-                            transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right',
-                            }}
-                        >
-                            The content of the Popover.
-                        </Popover>
-                        <ProfileDialog handleLogout={handleLogout}/>
-                    </Box>
+                    {cookies.get("USERNAME") &&
+                        <Box sx={{display: {xs: 'none', md: 'flex'}}}>
+                            <Notifications />
+                            <ProfileDialog handleLogout={handleLogout}/>
+                        </Box>
+                    }
                     <Box sx={{display: {xs: 'flex', md: 'none'}}}>
                         <IconButton
                             size="large"

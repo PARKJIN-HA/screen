@@ -34,6 +34,8 @@ const TaskDialog = ({ open, handleClose, task, onSave }) => {
             end: end.toISOString(),
             progress
         };
+        console.log(task);
+        console.log(updatedTask);
         onSave(updatedTask);
         handleClose();
     };

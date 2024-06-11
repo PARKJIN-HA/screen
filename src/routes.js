@@ -55,9 +55,11 @@ async function loginLoader() {
         }
     });
     if (response.status === 401) {
+        cookies.remove('USERNAME', { path: '/' });
         return null;
     }
     if (!response.ok) {
+        cookies.remove('USERNAME', { path: '/' });
         return null;
     }
 
@@ -72,6 +74,7 @@ async function loginLoader() {
 
 async function protectedLoader() {
     console.log('protectedLoader')
+    const cookies = new Cookies();
     const response = await fetch("http://localhost:9000/api/userinfo", {
         method: 'POST',
         credentials: 'include',
@@ -82,6 +85,7 @@ async function protectedLoader() {
     });
 
     if (!response.ok) {
+        cookies.remove('USERNAME', { path: '/' });
         return redirect("/login");
     }
     console.log(response);
